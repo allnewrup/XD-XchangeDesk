@@ -50,7 +50,17 @@
           "imageWidth": 220
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": false,
+            "enableShrinkResourcesInReleaseBuilds": false,
+            "extraProguardRules": "-keep class androidx.work.** { *; }\n-keep class androidx.room.** { *; }\n-keep class * extends androidx.room.RoomDatabase { *; }"
+          }
+        }
+      ]
     ],
     "scheme": "xchangedesk",
     "description": "Compare estimated exchange rates across UAE exchange houses and banks.",
