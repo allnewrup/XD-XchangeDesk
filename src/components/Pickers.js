@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, Modal, Pressable, SafeAreaView, SectionList, Switch, Text, TextInput, View, StyleSheet, ScrollView } from 'react-native';
+import { FlatList, Modal, Pressable, SectionList, Switch, Text, TextInput, View, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AREAS, EMIRATES } from '../data/seed.js';
 import { currencySections, flagFor } from '../lib/currencies.js';
