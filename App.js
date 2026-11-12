@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -13,6 +13,23 @@ import MapScreen from './src/screens/MapScreen.js';
 import SavedScreen from './src/screens/SavedScreen.js';
 import ProviderScreen from './src/screens/ProviderScreen.js';
 import { DocScreen, MoreScreen, SourcesScreen } from './src/screens/InfoScreens.js';
+
+/** Shows the error on screen instead of letting the app close with no explanation. */
+class CrashGuard extends React.Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (!this.state.error) return this.props.children;
+    const e = this.state.error;
+    return (
+      <ScrollView style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ padding: 24, paddingTop: 80, gap: 12 }}>
+        <Text style={{ fontSize: 24, fontWeight: '900', color: C.ink }}>Something went wrong</Text>
+        <Text style={{ fontSize: 15, color: C.muted }}>Xchange Desk hit an unexpected error. Please close the app and open it again. If it keeps happening, send the text below to xchangedesk@gmail.com.</Text>
+        <Text selectable style={{ fontSize: 12, color: C.bad }}>{String(e?.message ?? e)}{'\n\n'}{String(e?.stack ?? '').slice(0, 1200)}</Text>
+      </ScrollView>
+    );
+  }
+}
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -51,10 +68,12 @@ function Root() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AppProvider>
-        <StatusBar style="dark" />
-        <Root />
-      </AppProvider>
+      <CrashGuard>
+        <AppProvider>
+          <StatusBar style="dark" />
+          <Root />
+        </AppProvider>
+      </CrashGuard>
     </SafeAreaProvider>
   );
 }

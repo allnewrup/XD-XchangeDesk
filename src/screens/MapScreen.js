@@ -1,13 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Linking, Platform, StyleSheet, Text, View } from 'react-native';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../state/AppState.js';
 import { AREAS } from '../data/seed.js';
-import { fmtNum, km, rateDigits } from '../lib/pricing.js';
+import { fmtNum, km, rateDigits, mapsUrl } from '../lib/pricing.js';
+import { Button, Card } from '../components/ui.js';
 import { C } from '../theme.js';
 
-// react-native-maps only exists on iOS and Android; the web build (used for quick testing) shows a note instead.
-const Maps = Platform.OS === 'web' ? null : require('react-native-maps');
+// The native map needs: iOS (Apple Maps, no key), Expo Go (Expo's own key), or Android with a Google Maps API key in the build.
+// On Android without a key the Google Maps SDK crashes the whole app when a map is created, so we never create one then
+// and show a branch list instead. react-native-maps is loaded only when it can work (it does not exist on web).
+const inExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+const hasAndroidKey = !!Constants.expoConfig?.android?.config?.googleMaps?.apiKey;
+const nativeMapOk = Platform.OS === 'ios' || (Platform.OS === 'android' && (inExpoGo || hasAndroidKey));
+let Maps = null;
+if (nativeMapOk) { try { Maps = require('react-native-maps'); } catch { Maps = null; } }
 const MAX_PINS = 250;
 
 export default function MapScreen({ navigation, route }) {
@@ -40,8 +48,29 @@ export default function MapScreen({ navigation, route }) {
   const open = useCallback((id) => navigation.navigate('Provider', { id }), [navigation]);
 
   if (!Maps) {
+    const web = Platform.OS === 'web';
     return (
-      <SafeAreaView style={st.fallback}><Text style={st.t}>Map</Text><Text style={st.s}>The interactive map is available in the iPhone and Android apps. {pins.length} branches match your search.</Text></SafeAreaView>
+      <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
+        <FlatList
+          data={pins.slice(0, 40)} keyExtractor={(x) => x.b.id} contentContainerStyle={{ padding: 16, gap: 10 }}
+          ListHeaderComponent={(
+            <View style={{ gap: 4, marginBottom: 6 }}>
+              <Text style={st.t}>Nearby branches</Text>
+              <Text style={st.s}>{web ? 'The interactive map is available in the iPhone and Android apps.' : 'The in-app map is not enabled in this build, so here are the closest matching branches. Tap one for details, or open it in Google Maps.'} {pins.length} match your search.</Text>
+            </View>
+          )}
+          renderItem={({ item: { r, b, d } }) => (
+            <Card style={{ gap: 6 }}>
+              <Text style={st.name}>{r.provider.name}</Text>
+              <Text style={st.s}>{b.area === b.emirate ? b.emirate : `${b.area}, ${b.emirate}`} · {d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1)} km`} · {fmtNum(s.mode === 'sell' ? r.q.sellRate : r.q.buyRate, rateDigits(r.q.sellRate))} {s.to} per {s.from}</Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Button small title="Details" onPress={() => open(r.provider.id)} />
+                <Button small icon="open-outline" title="Google Maps" onPress={() => Linking.openURL(mapsUrl(b, r.provider)).catch(() => {})} />
+              </View>
+            </Card>
+          )}
+        />
+      </SafeAreaView>
     );
   }
   const { default: MapView, Marker } = Maps;
@@ -67,7 +96,7 @@ export default function MapScreen({ navigation, route }) {
 
 const st = StyleSheet.create({
   fallback: { flex: 1, padding: 24, backgroundColor: C.bg, justifyContent: 'center', gap: 8 },
-  t: { fontSize: 24, fontWeight: '800', color: C.ink }, s: { fontSize: 15, color: C.muted },
+  t: { fontSize: 24, fontWeight: '800', color: C.ink }, s: { fontSize: 14, color: C.muted, lineHeight: 20 }, name: { fontSize: 16, fontWeight: '800', color: C.ink },
   overlay: { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center' },
   chip: { marginTop: 8, backgroundColor: 'rgba(255,255,255,.92)', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   chipText: { fontSize: 12, fontWeight: '600', color: C.ink },

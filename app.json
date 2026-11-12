@@ -25,7 +25,9 @@
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -51,6 +53,11 @@
       "expo-font"
     ],
     "scheme": "xchangedesk",
-    "description": "Compare estimated exchange rates across UAE exchange houses and banks."
+    "description": "Compare estimated exchange rates across UAE exchange houses and banks.",
+    "extra": {
+      "eas": {
+        "projectId": "7f06b651-7276-4b58-b25a-3b3da7b62759"
+      }
+    }
   }
 }
