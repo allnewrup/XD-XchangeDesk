@@ -60,10 +60,10 @@ export function Banner({ tone = 'warn', children }) {
   return <View accessibilityRole="alert" style={[st.banner, { backgroundColor: t[0] }]}><Text style={{ color: t[1], fontSize: 13, lineHeight: 18 }}>{children}</Text></View>;
 }
 
-export function AedBadge({ size = 22 }) {
+export function XdBadge({ size = 22 }) {
   return (
     <View style={{ backgroundColor: C.gold2, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: C.gold1 }} accessible={false}>
-      <Text style={{ color: '#5a3f08', fontWeight: '900', fontSize: size, letterSpacing: 1 }}>AED</Text>
+      <Text style={{ color: '#5a3f08', fontWeight: '900', fontSize: size, letterSpacing: 1 }}>XD</Text>
     </View>
   );
 }

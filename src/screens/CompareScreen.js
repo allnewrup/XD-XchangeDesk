@@ -8,7 +8,7 @@ import { useApp } from '../state/AppState.js';
 import { marketInfo } from '../lib/market.js';
 import { fmtNum, fmtUae } from '../lib/pricing.js';
 import { C, R, MONO } from '../theme.js';
-import { AedBadge, Banner, Button, Card, Label, Segmented, mono } from '../components/ui.js';
+import { XdBadge, Banner, Button, Card, Label, Segmented, mono } from '../components/ui.js';
 import { AreaPicker, CurrencyPicker, FiltersSheet, PairButton } from '../components/Pickers.js';
 import ProviderCard from '../components/ProviderCard.js';
 
@@ -33,7 +33,7 @@ export default function CompareScreen({ navigation }) {
   const header = (
     <View style={{ gap: 12 }}>
       <View style={st.brand}>
-        <AedBadge />
+        <XdBadge />
         <View style={{ flex: 1 }}>
           <Text accessibilityRole="header" style={st.title}>Xchange Desk</Text>
           <Text style={st.tag}>Compare UAE exchange houses &amp; banks</Text>
