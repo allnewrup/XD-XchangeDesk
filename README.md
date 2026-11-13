@@ -1,6 +1,6 @@
 # Xchange Desk (mobile app)
 
-The iPhone and Android app for Xchange Desk. It compares estimated exchange rates across 127 UAE exchange houses and banks (about 890 branches), with live market rates, filters, a native map, saved currency pairs, offline last-known rates and directions.
+The iPhone and Android app for Xchange Desk. It compares estimated exchange rates across 127 UAE exchange houses and banks (about 890 branches), with live market rates, filters, a native map (free, no API key), saved currency pairs, offline last-known rates and directions.
 
 This is a **separate project** from the website (`../dxb-fx-compare`). They share no code at runtime: the app is React Native (Expo), the website is a Vite web app. Logic that is the same in both (pricing, rate consensus, result sorting) was ported, and the website's server only relays the Yahoo rate feed.
 
@@ -25,7 +25,7 @@ Other ways to run it:
 
 - **Compare:** currency pair (203 currencies, searchable picker), amount, sell/buy, cash/bank transfer, area, filters (type, open now, emirates), search, "Near me" (distance sorting), pull to refresh, a "Best right now" card and a live market-rate board with its age and source agreement.
 - **Provider screen:** the estimate with the market rate, modelled spread and fee; every branch with hours, open/closed and distance; directions; link to reviews on Google Maps.
-- **Map:** native map (Apple Maps on iPhone, Google Maps on Android) with the matching branches; green pin = best rate.
+- **Map:** native map (MapLibre with OpenFreeMap tiles, no API key or billing account) with the matching branches; green pin = best rate; tap a pin for details and directions. Not available in Expo Go (it needs a real build); there the tab lists nearby branches instead.
 - **Saved:** favourite pairs with live market rates, plus quick starts.
 - **More:** About, How rates are calculated, Data sources and update times (live), Contact, Privacy Policy, Terms of Service.
 - **Offline:** the last search, saved pairs and last-known rates are stored on the phone and shown (clearly labelled) when there is no connection.
@@ -60,7 +60,7 @@ Before the first build, check `app.json`: `ios.bundleIdentifier` and `android.pa
 ### Before submitting to the App Store / Google Play
 
 1. **Licensed rate data.** The Yahoo endpoint is unofficial and its terms do not allow commercial redistribution. Replace it with a licensed rates API before a store release (`src/lib/fx.js`).
-2. **Google Maps key (Android store builds).** Add `android.config.googleMaps.apiKey` to `app.json` (Expo Go works without it). iPhone needs no key.
+2. **Map:** nothing to set up. OpenFreeMap is a donation-funded free service with no uptime guarantee; for heavy traffic, self-host tiles or switch to a paid provider.
 3. **Store listing:** screenshots, description, support URL and privacy policy URL (`https://dxb-fx-compare.vercel.app/privacy`; add an "app" section there, since it currently describes only the website).
 4. **Privacy labels:** the app collects no data into its own systems (location stays on the phone). Third parties it contacts are listed in the in-app Privacy Policy.
 5. **Apple's "minimum functionality" rule (4.2):** an app must be more than a repackaged website. This one has native maps, location, saved pairs and an offline cache; adding rate alerts (push) or a home-screen widget would make approval safer.

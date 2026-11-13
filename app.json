@@ -60,7 +60,8 @@
             "extraProguardRules": "-keep class androidx.work.** { *; }\n-keep class androidx.room.** { *; }\n-keep class * extends androidx.room.RoomDatabase { *; }"
           }
         }
-      ]
+      ],
+      "@maplibre/maplibre-react-native"
     ],
     "scheme": "xchangedesk",
     "description": "Compare estimated exchange rates across UAE exchange houses and banks.",

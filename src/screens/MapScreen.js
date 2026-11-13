@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Linking, Platform, StyleSheet, Text, View } from 'react-native';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,15 +8,16 @@ import { fmtNum, km, rateDigits, mapsUrl } from '../lib/pricing.js';
 import { Button, Card } from '../components/ui.js';
 import { C } from '../theme.js';
 
-// The native map needs: iOS (Apple Maps, no key), Expo Go (Expo's own key), or Android with a Google Maps API key in the build.
-// On Android without a key the Google Maps SDK crashes the whole app when a map is created, so we never create one then
-// and show a branch list instead. react-native-maps is loaded only when it can work (it does not exist on web).
+// The map is MapLibre (native, free, no API key) drawing OpenFreeMap tiles: the same OpenStreetMap-based map as the website.
+// It needs a real build, so it is not available in Expo Go or on web; there we show a branch list instead.
+// The module is loaded only where it can work, so a missing native module can never take the app down.
+const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const inExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
-const hasAndroidKey = !!Constants.expoConfig?.extra?.googleMapsEnabled; // set by app.config.js when a key is built in
-const nativeMapOk = Platform.OS === 'ios' || (Platform.OS === 'android' && (inExpoGo || hasAndroidKey));
-let Maps = null;
-if (nativeMapOk) { try { Maps = require('react-native-maps'); } catch { Maps = null; } }
+const nativeMapOk = Platform.OS !== 'web' && !inExpoGo;
+let ML = null;
+if (nativeMapOk) { try { ML = require('@maplibre/maplibre-react-native'); } catch { ML = null; } }
 const MAX_PINS = 250;
+const zoomFor = (delta) => Math.max(3, Math.min(17, Math.log2(360 / delta)));
 
 export default function MapScreen({ navigation, route }) {
   const { s, userLoc, origin, sorted, best } = useApp();
@@ -27,27 +28,58 @@ export default function MapScreen({ navigation, route }) {
     return all.sort((a, b) => a.d - b.d).slice(0, MAX_PINS);
   }, [sorted, origin]);
 
-  const region = useMemo(() => {
+  const view = useMemo(() => {
     const a = AREAS.find((x) => x.id === s.areaId);
     const [lat, lng] = userLoc ? [userLoc.lat, userLoc.lng] : a?.center ?? [24.9, 54.9];
     const wide = !userLoc && (!a || a.kind === 'all');
-    return { latitude: lat, longitude: lng, latitudeDelta: wide ? 2.6 : a?.kind === 'emirate' && !userLoc ? 0.6 : 0.08, longitudeDelta: wide ? 2.6 : a?.kind === 'emirate' && !userLoc ? 0.6 : 0.08 };
+    const delta = wide ? 2.6 : a?.kind === 'emirate' && !userLoc ? 0.6 : 0.08;
+    return { center: [lng, lat], zoom: zoomFor(delta) };
   }, [s.areaId, userLoc]);
+  const firstView = useRef(view);
 
-  useEffect(() => { ref.current?.animateToRegion?.(region, 400); }, [region]);
+  const [picked, setPicked] = useState(null); // { pid, bid }
+  const geo = useMemo(() => ({
+    type: 'FeatureCollection',
+    features: pins.map(({ r, b }) => ({
+      type: 'Feature',
+      properties: { pid: r.provider.id, bid: b.id, best: r === best ? 1 : 0 },
+      geometry: { type: 'Point', coordinates: [b.lng, b.lat] },
+    })),
+  }), [pins, best]);
+  const me = useMemo(() => ({
+    type: 'FeatureCollection',
+    features: userLoc ? [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [userLoc.lng, userLoc.lat] } }] : [],
+  }), [userLoc]);
+  const sel = useMemo(() => {
+    if (!picked) return null;
+    const hit = pins.find((p) => p.r.provider.id === picked.pid && p.b.id === picked.bid);
+    if (hit) return hit;
+    const r = sorted.find((x) => x.provider.id === picked.pid);
+    const b = r?.branches.find((x) => x.id === picked.bid);
+    return r && b ? { r, b, d: km(origin, [b.lat, b.lng]) } : null;
+  }, [picked, pins, sorted, origin]);
 
-  // "On map" from a provider screen: fly to that branch.
+  useEffect(() => { if (view !== firstView.current) ref.current?.easeTo?.({ center: view.center, zoom: view.zoom, duration: 500 }); }, [view]);
+
+  // "On map" from a provider screen: fly to that branch and select it.
   const focus = route.params?.focus;
   useEffect(() => {
     if (!focus) return;
-    const hit = pins.find((p) => p.r.provider.id === focus.pid && p.b.id === focus.bid);
-    const b = hit?.b ?? sorted.find((r) => r.provider.id === focus.pid)?.branches.find((x) => x.id === focus.bid);
-    if (b) ref.current?.animateToRegion?.({ latitude: b.lat, longitude: b.lng, latitudeDelta: 0.01, longitudeDelta: 0.01 }, 500);
-  }, [focus, pins, sorted]);
+    const r = sorted.find((x) => x.provider.id === focus.pid);
+    const b = r?.branches.find((x) => x.id === focus.bid);
+    if (!b) return;
+    setPicked({ pid: focus.pid, bid: focus.bid });
+    ref.current?.flyTo?.({ center: [b.lng, b.lat], zoom: 15, duration: 800 });
+  }, [focus, sorted]);
+
+  const onPinPress = useCallback((e) => {
+    const f = e?.nativeEvent?.features?.[0]?.properties;
+    if (f?.pid) { e.stopPropagation?.(); setPicked({ pid: f.pid, bid: f.bid }); }
+  }, []);
 
   const open = useCallback((id) => navigation.navigate('Provider', { id }), [navigation]);
 
-  if (!Maps) {
+  if (!ML) {
     const web = Platform.OS === 'web';
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: C.bg }} edges={['top']}>
@@ -56,7 +88,7 @@ export default function MapScreen({ navigation, route }) {
           ListHeaderComponent={(
             <View style={{ gap: 4, marginBottom: 6 }}>
               <Text style={st.t}>Nearby branches</Text>
-              <Text style={st.s}>{web ? 'The interactive map is available in the iPhone and Android apps.' : 'The in-app map is not enabled in this build, so here are the closest matching branches. Tap one for details, or open it in Google Maps.'} {pins.length} match your search.</Text>
+              <Text style={st.s}>{web ? 'The interactive map is available in the iPhone and Android apps.' : 'The interactive map needs the installed app (it is not available in Expo Go), so here are the closest matching branches. Tap one for details, or open it in Google Maps.'} {pins.length} match your search.</Text>
             </View>
           )}
           renderItem={({ item: { r, b, d } }) => (
@@ -73,23 +105,42 @@ export default function MapScreen({ navigation, route }) {
       </SafeAreaView>
     );
   }
-  const { default: MapView, Marker } = Maps;
+  const { Map: MapView, Camera, GeoJSONSource, Layer } = ML;
+  const rate = sel ? (s.mode === 'sell' ? sel.r.q.sellRate : sel.r.q.buyRate) : 0;
   return (
     <View style={{ flex: 1 }}>
-      <MapView ref={ref} style={{ flex: 1 }} initialRegion={region} showsUserLocation={!!userLoc} showsMyLocationButton={false} accessibilityLabel="Map of matching branches">
-        {pins.map(({ r, b }) => {
-          const rate = s.mode === 'sell' ? r.q.sellRate : r.q.buyRate;
-          return (
-            <Marker
-              key={b.id} coordinate={{ latitude: b.lat, longitude: b.lng }} pinColor={r === best ? C.go : C.sky} tracksViewChanges={false}
-              title={r.provider.name} description={`${fmtNum(rate, rateDigits(rate))} ${s.to} per ${s.from} · ${b.area}`} onCalloutPress={() => open(r.provider.id)}
-            />
-          );
-        })}
+      <MapView style={{ flex: 1 }} mapStyle={STYLE_URL} onPress={() => setPicked(null)} accessibilityLabel="Map of matching branches">
+        <Camera ref={ref} initialViewState={{ center: firstView.current.center, zoom: firstView.current.zoom }} />
+        <GeoJSONSource id="branches" data={geo} onPress={onPinPress}>
+          <Layer
+            id="branch-pins" type="circle"
+            paint={{
+              'circle-radius': ['case', ['==', ['get', 'best'], 1], 9, 7],
+              'circle-color': ['case', ['==', ['get', 'best'], 1], C.go, C.sky],
+              'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2,
+            }}
+          />
+        </GeoJSONSource>
+        <GeoJSONSource id="me" data={me}>
+          <Layer id="me-dot" type="circle" paint={{ 'circle-radius': 7, 'circle-color': '#1a73e8', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 3 }} />
+        </GeoJSONSource>
       </MapView>
       <SafeAreaView edges={['top']} style={st.overlay} pointerEvents="none">
-        <View style={st.chip}><Text style={st.chipText}>{pins.length} branches · green = best rate · tap a pin, then its label for details</Text></View>
+        <View style={st.chip}><Text style={st.chipText}>{pins.length} branches · green = best rate · tap a pin</Text></View>
       </SafeAreaView>
+      {sel && (
+        <View style={st.sheet}>
+          <Card style={{ gap: 6 }}>
+            <Text style={st.name}>{sel.r.provider.name}</Text>
+            <Text style={st.s}>{sel.b.area === sel.b.emirate ? sel.b.emirate : `${sel.b.area}, ${sel.b.emirate}`} · {sel.d < 1 ? `${Math.round(sel.d * 1000)} m` : `${sel.d.toFixed(1)} km`} · {fmtNum(rate, rateDigits(rate))} {s.to} per {s.from}</Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Button small title="Details" onPress={() => open(sel.r.provider.id)} />
+              <Button small icon="open-outline" title="Google Maps" onPress={() => Linking.openURL(mapsUrl(sel.b, sel.r.provider)).catch(() => {})} />
+            </View>
+          </Card>
+        </View>
+      )}
+      <Text style={st.attr} pointerEvents="none">© OpenStreetMap contributors · OpenFreeMap · OpenMapTiles</Text>
     </View>
   );
 }
@@ -99,5 +150,7 @@ const st = StyleSheet.create({
   t: { fontSize: 24, fontWeight: '800', color: C.ink }, s: { fontSize: 14, color: C.muted, lineHeight: 20 }, name: { fontSize: 16, fontWeight: '800', color: C.ink },
   overlay: { position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center' },
   chip: { marginTop: 8, backgroundColor: 'rgba(255,255,255,.92)', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  sheet: { position: 'absolute', left: 12, right: 12, bottom: 24 },
+  attr: { position: 'absolute', right: 6, bottom: 4, fontSize: 9, color: 'rgba(0,0,0,.6)', backgroundColor: 'rgba(255,255,255,.7)', paddingHorizontal: 4, borderRadius: 3 },
   chipText: { fontSize: 12, fontWeight: '600', color: C.ink },
 });
