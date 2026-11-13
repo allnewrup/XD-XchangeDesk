@@ -12,7 +12,7 @@ import { C } from '../theme.js';
 // On Android without a key the Google Maps SDK crashes the whole app when a map is created, so we never create one then
 // and show a branch list instead. react-native-maps is loaded only when it can work (it does not exist on web).
 const inExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
-const hasAndroidKey = !!Constants.expoConfig?.android?.config?.googleMaps?.apiKey;
+const hasAndroidKey = !!Constants.expoConfig?.extra?.googleMapsEnabled; // set by app.config.js when a key is built in
 const nativeMapOk = Platform.OS === 'ios' || (Platform.OS === 'android' && (inExpoGo || hasAndroidKey));
 let Maps = null;
 if (nativeMapOk) { try { Maps = require('react-native-maps'); } catch { Maps = null; } }
