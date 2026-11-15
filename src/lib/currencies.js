@@ -1,6 +1,6 @@
 import { CURRENCIES } from '../data/seed.js';
 
-const POPULAR = [...CURRENCIES.map((c) => c.code), 'CAD', 'AUD', 'JPY', 'CNY', 'CHF', 'TRY', 'EGP', 'KWD', 'QAR', 'OMR', 'BHD', 'LKR', 'BDT', 'NPR', 'THB', 'MYR', 'SGD', 'RUB', 'ZAR', 'KRW', 'IDR', 'NGN', 'KES'];
+const POPULAR = [...new Set([...CURRENCIES.map((c) => c.code), 'CAD', 'AUD', 'JPY', 'CNY', 'CHF', 'TRY', 'EGP', 'KWD', 'QAR', 'OMR', 'BHD', 'LKR', 'BDT', 'NPR', 'THB', 'MYR', 'SGD', 'RUB', 'ZAR', 'KRW', 'IDR', 'NGN', 'KES'])];
 
 let names, regions;
 try { names = new Intl.DisplayNames(['en'], { type: 'currency' }); regions = new Intl.DisplayNames(['en'], { type: 'region' }); } catch { /* older browsers: fall back to codes */ }

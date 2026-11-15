@@ -9,7 +9,7 @@ export default function ChatLauncher({ app, lift }) {
   // Sit above the comparison tray when it is open, whatever height it has.
   const [trayH, setTrayH] = useState(0);
   useEffect(() => {
-    const el = lift ? document.querySelector('section[aria-label="Side-by-side comparison"]') : null;
+    const el = lift ? document.querySelector('section[aria-label="Direct comparison dock"]') : null;
     if (!el) { setTrayH(0); return undefined; }
     const ro = new ResizeObserver(() => setTrayH(el.offsetHeight));
     ro.observe(el);
@@ -26,11 +26,11 @@ export default function ChatLauncher({ app, lift }) {
       )}
       <button
         type="button" onClick={toggle} aria-expanded={open} aria-label={open ? 'Close assistant' : 'Open the Xchange assistant'}
-        className="btn btn-primary fixed right-3 z-50 !rounded-full !px-4 !py-3 sm:right-5"
-        style={{ bottom: trayH + 16 }}
+        className="btn btn-primary fixed right-4 z-40 !rounded-full !px-3.5 !py-2.5 shadow-lg"
+        style={{ bottom: trayH + 14 }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z" /></svg>
-        <span className="font-display text-base font-bold uppercase tracking-wide">{open ? 'Close' : 'Ask Xchange'}</span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z" /></svg>
+        <span className="text-xs font-bold uppercase tracking-wider">{open ? 'Close' : 'Ask Xchange'}</span>
       </button>
     </>
   );

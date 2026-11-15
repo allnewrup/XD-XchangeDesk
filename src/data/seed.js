@@ -11,12 +11,13 @@ export const CURRENCIES = [
   { code: 'INR', name: 'Indian Rupee', flag: '🇮🇳' },
   { code: 'PHP', name: 'Philippine Peso', flag: '🇵🇭' },
   { code: 'PKR', name: 'Pakistani Rupee', flag: '🇵🇰' },
+  { code: 'EGP', name: 'Egyptian Pound', flag: '🇪🇬' },
   { code: 'SAR', name: 'Saudi Riyal', flag: '🇸🇦' },
 ];
 
 // Offline fallback only (rates as of 6 Nov 2026). Replaced by live quotes on load: see fxDataService.
 export const SEED_MID_PER_AED = {
-  AED: 1, USD: 0.27227, EUR: 0.24433, GBP: 0.20386, INR: 25.57, PHP: 17.16, PKR: 75.30, SAR: 1.0219,
+  AED: 1, USD: 0.27227, EUR: 0.24433, GBP: 0.20386, INR: 25.57, PHP: 17.16, PKR: 75.30, EGP: 13.45, SAR: 1.0219,
 };
 
 export const EMIRATES = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain'];
