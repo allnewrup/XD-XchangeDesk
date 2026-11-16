@@ -4,6 +4,7 @@ import { quote, convert, midRate, emiratesForArea, areaForEmirates } from './pri
 import { deriveRows, sortRows, applyPatch } from './results.js';
 import { computeDashboardMetrics, buildTrendSeries, computeMultiTransferComparison } from './analytics.js';
 import { mergeSpotIntoSnapshot, buildCrossHistorySeries, evaluateTriggeredAlerts } from './liveRates.js';
+import { buildComparisonCsv } from './exportCsv.js';
 import { SEED_MID_PER_AED, PROVIDERS, EMIRATES } from '../data/seed.js';
 
 const mockData = {
@@ -154,4 +155,14 @@ test('evaluateTriggeredAlerts returns alerts whose live rate meets target', () =
   const triggered = evaluateTriggeredAlerts(alerts, { AED: 1, INR: 25.68 });
   assert.equal(triggered.length, 1);
   assert.equal(triggered[0].id, '1');
+});
+
+test('buildComparisonCsv formats headers, cash/bank fees, and escaped commas', () => {
+  assert.equal(buildComparisonCsv([], baseSearch), '');
+  const rows = deriveRows(mockData, { ...baseSearch, channel: 'bank' }, {}, [25.27, 55.3]);
+  const csv = buildComparisonCsv(rows, { ...baseSearch, channel: 'bank' });
+  const lines = csv.split('\n');
+  assert.equal(lines.length, rows.length + 1);
+  assert.ok(lines[0].startsWith('Provider,Type,From,To,Amount,Mode,Channel,Rate,Fee,RecipientGets,'));
+  assert.ok(lines[1].includes('"Deira, Dubai"') || lines.some((l) => l.includes('"Deira, Dubai"')));
 });

@@ -12,6 +12,7 @@ import { km, fmtNum, rateDigits, ageLabel, guessHomeCurrency, directionsUrl } fr
 import { applyPatch, originFor, deriveRows, isSpecificArea, sortRows, pairNoteFor } from './lib/results.js';
 import { computeDashboardMetrics } from './lib/analytics.js';
 import { evaluateTriggeredAlerts } from './lib/liveRates.js';
+import { downloadComparisonCsv } from './lib/exportCsv.js';
 import TopTicker from './components/TopTicker.jsx';
 import HeaderNav from './components/HeaderNav.jsx';
 import SyncStrip from './components/SyncStrip.jsx';
@@ -336,6 +337,74 @@ export default function App() {
 
   const specificArea = isSpecificArea(s, userLoc);
   const sorted = useMemo(() => sortRows(rows, s, specificArea), [rows, s.sort, s.mode, specificArea]); // eslint-disable-line react-hooks/exhaustive-deps
+  const sortedRef = useRef(sorted);
+  sortedRef.current = sorted;
+
+  // Sync live conversion rate to the browser tab title
+  useEffect(() => {
+    const defaultTitle = 'Xchange Desk · UAE exchange rate comparison';
+    if (PageView || !pairMid) {
+      document.title = defaultTitle;
+      return undefined;
+    }
+    const digits = rateDigits(pairMid);
+    document.title = `1 ${s.from} = ${pairMid.toFixed(digits)} ${s.to} · Xchange Desk`;
+    return () => { document.title = defaultTitle; };
+  }, [PageView, s.from, s.to, pairMid]);
+
+  // Keyboard shortcuts when focus is outside form fields: "/" search, "r" sync, "s" swap currencies
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+      if (e.key === '/') {
+        const input = document.getElementById('storeSearch');
+        if (input) {
+          e.preventDefault();
+          input.focus();
+          input.select?.();
+        }
+      } else if (e.key === 'r' || e.key === 'R') {
+        refreshFull(false);
+      } else if (e.key === 's' || e.key === 'S') {
+        set({ from: sRef.current.to, to: sRef.current.from });
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [refreshFull, set]);
+
+  // Programmatic browser JavaScript API for live state, rate queries, and CSV export
+  useEffect(() => {
+    window.XchangeDesk = {
+      getState: () => ({ ...sRef.current }),
+      getMidRate: (from = sRef.current.from, to = sRef.current.to) => {
+        const mid = dataRef.current.mid;
+        return mid?.[from] && mid?.[to] ? mid[to] / mid[from] : null;
+      },
+      getTopProviders: (limit = 5) => sortedRef.current.slice(0, limit).map((r) => ({
+        id: r.provider.id,
+        name: r.provider.name,
+        type: r.provider.type,
+        rate: sRef.current.mode === 'sell' ? r.q.sellRate : r.q.buyRate,
+        fee: sRef.current.channel === 'bank' ? r.q.feeBase : 0,
+        total: r.total,
+        marginPct: r.q.marginPct,
+      })),
+      setPair: (from, to, amount) => {
+        const patch = { from: String(from || 'AED').toUpperCase(), to: String(to || 'INR').toUpperCase() };
+        if (amount != null && Number(amount) > 0) {
+          patch.amount = Number(amount);
+          patch.amountText = String(amount);
+        }
+        set(patch);
+      },
+      refreshRates: () => refreshFull(false),
+      exportTopCsv: (limit = 10) => downloadComparisonCsv(sortedRef.current.slice(0, limit), sRef.current),
+    };
+    return () => { delete window.XchangeDesk; };
+  }, [set, refreshFull]);
 
   const metrics = useMemo(
     () => computeDashboardMetrics(rows, s, data.providers),

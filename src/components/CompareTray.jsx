@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Mark, Icon } from './ui.jsx';
 import { fmtNum, rateDigits, hoursLabel } from '../lib/pricing.js';
+import { downloadComparisonCsv } from '../lib/exportCsv.js';
 
 export default function CompareTray({ rows, s, open, onClose, onRemove, onClear }) {
   useEffect(() => {
@@ -47,7 +48,10 @@ export default function CompareTray({ rows, s, open, onClose, onRemove, onClear 
               Comparing {rows.length} Providers · {fmtNum(s.amount, 0)} {s.from} → {s.to}
             </h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" className="btn btn-sm" onClick={() => downloadComparisonCsv(rows, s)}>
+              Export CSV
+            </button>
             <button type="button" className="btn btn-sm" onClick={() => { onClear(); onClose(); }}>
               Clear All
             </button>
