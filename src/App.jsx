@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { AREAS, EMIRATES } from './data/seed.js';
 import {
   getWarmSnapshot,
@@ -797,6 +798,7 @@ export default function App() {
 
         {qrOpen && <QrModal onClose={() => setQrOpen(false)} />}
         <ChatLauncher app={chatApp} lift={compareRows.length >= 1} />
+        <Analytics />
       </div>
     </>
   );
