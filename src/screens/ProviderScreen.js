@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../state/AppState.js';
 import { quote, convert, fmtNum, rateDigits, hoursLabel, isOpenNow, km, directionsUrl, reviewsUrl } from '../lib/pricing.js';
 import { C } from '../theme.js';
@@ -54,13 +55,21 @@ export default function ProviderScreen({ route, navigation }) {
         <Label>Branches{specific ? ' · nearest first' : ''}</Label>
         {list.map(({ b, d }) => {
           const isOpen = isOpenNow(b);
+          const place = b.area === b.emirate ? b.emirate : `${b.area}, ${b.emirate}`;
           return (
             <Card key={b.id} style={{ gap: 6 }}>
-              <View style={st.rowBetween}>
-                <Text style={st.bName}>{b.area === b.emirate ? b.emirate : `${b.area}, ${b.emirate}`}</Text>
-                <Pill tone={isOpen ? 'go' : 'off'}>{isOpen === null ? 'Hours not listed' : isOpen ? 'Open now' : 'Closed'}</Pill>
-              </View>
-              <Text style={st.sub}>{[b.address, b.hours ? hoursLabel(b) : null, specific ? (d < 1 ? `${Math.round(d * 1000)} m away` : `${d.toFixed(1)} km away`) : null].filter(Boolean).join(' · ') || 'Address not listed'}</Text>
+              {/* The info area opens the store; the buttons stay siblings so screen readers can still reach them. */}
+              <Pressable
+                accessibilityRole="button" accessibilityLabel={`${place}. ${isOpen === null ? 'Hours not listed' : isOpen ? 'Open now' : 'Closed'}. Open store`}
+                onPress={() => navigation.navigate('Store', { pid: p.id, bid: b.id })} style={({ pressed }) => [{ gap: 6 }, pressed && { opacity: 0.6 }]}
+              >
+                <View style={st.rowBetween}>
+                  <Text style={st.bName}>{place}</Text>
+                  <Pill tone={isOpen ? 'go' : 'off'}>{isOpen === null ? 'Hours not listed' : isOpen ? 'Open now' : 'Closed'}</Pill>
+                  <Ionicons name="chevron-forward" size={18} color={C.faint} />
+                </View>
+                <Text style={st.sub}>{[b.address, b.hours ? hoursLabel(b) : null, specific ? (d < 1 ? `${Math.round(d * 1000)} m away` : `${d.toFixed(1)} km away`) : null].filter(Boolean).join(' · ') || 'Address not listed'}</Text>
+              </Pressable>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Button small icon="map" title="On map" onPress={() => navigation.navigate('Tabs', { screen: 'Map', params: { focus: { pid: p.id, bid: b.id } } })} />
                 <Button small icon="navigate" title="Directions" onPress={() => open(directionsUrl(b, p))} />

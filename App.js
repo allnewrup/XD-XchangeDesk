@@ -12,6 +12,7 @@ import CompareScreen from './src/screens/CompareScreen.js';
 import MapScreen from './src/screens/MapScreen.js';
 import SavedScreen from './src/screens/SavedScreen.js';
 import ProviderScreen from './src/screens/ProviderScreen.js';
+import StoreScreen from './src/screens/StoreScreen.js';
 import { DocScreen, MoreScreen, SourcesScreen } from './src/screens/InfoScreens.js';
 
 /** Shows the error on screen instead of letting the app close with no explanation. */
@@ -58,6 +59,7 @@ function Root() {
       <Stack.Navigator screenOptions={{ headerBackButtonDisplayMode: 'minimal', headerTintColor: C.sky }}>
         <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
         <Stack.Screen name="Provider" component={ProviderScreen} options={{ title: 'Provider' }} />
+        <Stack.Screen name="Store" component={StoreScreen} options={{ title: 'Store' }} />
         <Stack.Screen name="Doc" component={DocScreen} options={{ title: '' }} />
         <Stack.Screen name="Sources" component={SourcesScreen} options={{ title: '' }} />
       </Stack.Navigator>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Linking, Platform, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../state/AppState.js';
@@ -77,7 +77,26 @@ export default function MapScreen({ navigation, route }) {
     if (f?.pid) { e.stopPropagation?.(); setPicked({ pid: f.pid, bid: f.bid }); }
   }, []);
 
-  const open = useCallback((id) => navigation.navigate('Provider', { id }), [navigation]);
+  const openStore = useCallback((r, b) => navigation.navigate('Store', { pid: r.provider.id, bid: b.id }), [navigation]);
+  const place = (b) => (b.area === b.emirate ? b.emirate : `${b.area}, ${b.emirate}`);
+  const dist = (d) => (d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1)} km`);
+
+  // Tapping the name/details part opens the store; the buttons stay siblings so screen readers can still reach them.
+  const storeCard = (r, b, d, rate) => (
+    <Card style={{ gap: 6 }}>
+      <Pressable
+        accessibilityRole="button" accessibilityLabel={`${r.provider.name}, ${place(b)}. Open store`}
+        onPress={() => openStore(r, b)} style={({ pressed }) => [{ gap: 4 }, pressed && { opacity: 0.6 }]}
+      >
+        <Text style={st.name}>{r.provider.name}</Text>
+        <Text style={st.s}>{place(b)} · {dist(d)} · {fmtNum(rate, rateDigits(rate))} {s.to} per {s.from}</Text>
+      </Pressable>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Button small kind="primary" icon="storefront-outline" title="Open store" onPress={() => openStore(r, b)} />
+        <Button small icon="open-outline" title="Google Maps" onPress={() => Linking.openURL(mapsUrl(b, r.provider)).catch(() => {})} />
+      </View>
+    </Card>
+  );
 
   if (!ML) {
     const web = Platform.OS === 'web';
@@ -88,19 +107,10 @@ export default function MapScreen({ navigation, route }) {
           ListHeaderComponent={(
             <View style={{ gap: 4, marginBottom: 6 }}>
               <Text style={st.t}>Nearby branches</Text>
-              <Text style={st.s}>{web ? 'The interactive map is available in the iPhone and Android apps.' : 'The interactive map needs the installed app (it is not available in Expo Go), so here are the closest matching branches. Tap one for details, or open it in Google Maps.'} {pins.length} match your search.</Text>
+              <Text style={st.s}>{web ? 'The interactive map is available in the iPhone and Android apps.' : 'The interactive map needs the installed app (it is not available in Expo Go), so here are the closest matching branches. Tap one to open the store, or open it in Google Maps.'} {pins.length} match your search.</Text>
             </View>
           )}
-          renderItem={({ item: { r, b, d } }) => (
-            <Card style={{ gap: 6 }}>
-              <Text style={st.name}>{r.provider.name}</Text>
-              <Text style={st.s}>{b.area === b.emirate ? b.emirate : `${b.area}, ${b.emirate}`} · {d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1)} km`} · {fmtNum(s.mode === 'sell' ? r.q.sellRate : r.q.buyRate, rateDigits(r.q.sellRate))} {s.to} per {s.from}</Text>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button small title="Details" onPress={() => open(r.provider.id)} />
-                <Button small icon="open-outline" title="Google Maps" onPress={() => Linking.openURL(mapsUrl(b, r.provider)).catch(() => {})} />
-              </View>
-            </Card>
-          )}
+          renderItem={({ item: { r, b, d } }) => storeCard(r, b, d, s.mode === 'sell' ? r.q.sellRate : r.q.buyRate)}
         />
       </SafeAreaView>
     );
@@ -128,18 +138,7 @@ export default function MapScreen({ navigation, route }) {
       <SafeAreaView edges={['top']} style={st.overlay} pointerEvents="none">
         <View style={st.chip}><Text style={st.chipText}>{pins.length} branches · green = best rate · tap a pin</Text></View>
       </SafeAreaView>
-      {sel && (
-        <View style={st.sheet}>
-          <Card style={{ gap: 6 }}>
-            <Text style={st.name}>{sel.r.provider.name}</Text>
-            <Text style={st.s}>{sel.b.area === sel.b.emirate ? sel.b.emirate : `${sel.b.area}, ${sel.b.emirate}`} · {sel.d < 1 ? `${Math.round(sel.d * 1000)} m` : `${sel.d.toFixed(1)} km`} · {fmtNum(rate, rateDigits(rate))} {s.to} per {s.from}</Text>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button small title="Details" onPress={() => open(sel.r.provider.id)} />
-              <Button small icon="open-outline" title="Google Maps" onPress={() => Linking.openURL(mapsUrl(sel.b, sel.r.provider)).catch(() => {})} />
-            </View>
-          </Card>
-        </View>
-      )}
+      {sel && <View style={st.sheet}>{storeCard(sel.r, sel.b, sel.d, rate)}</View>}
       <Text style={st.attr} pointerEvents="none">© OpenStreetMap contributors · OpenFreeMap · OpenMapTiles</Text>
     </View>
   );

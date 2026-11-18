@@ -111,6 +111,7 @@ const toBranch = (item, key, i) => ({
   lng: item.lo,
   address: item.ad || '', // OSM often has no street address; the card then shows the area and coordinates only
   hours: parseHours(item.oh),
+  hoursText: item.oh || undefined, // the full OSM string (with days), shown on the store page
   osmName: item.n || undefined,
 });
 
