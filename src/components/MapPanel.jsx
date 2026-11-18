@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { fmtNum, directionsUrl } from '../lib/pricing.js';
+import { ProviderLink } from './ui.jsx';
 import places from '../data/map-places.json';
 
 // Map languages. Place labels are drawn by us (browser text, so every script renders properly) over a base map
@@ -246,7 +247,7 @@ export default function MapPanel({ pins, selectedId, onSelect, bestId, selected,
       {selected && (
         <div className="well flex flex-col gap-1 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <strong className="font-display text-lg tracking-wide">{selected.p.name}</strong>
+            <strong className="font-display text-lg tracking-wide"><ProviderLink provider={selected.p} /></strong>
             <span className="font-mono text-sm font-semibold">{fmtNum(selected.rate, selected.digits)}</span>
           </div>
           <p className="text-sm text-steel-600">{selected.b.area === selected.b.emirate ? selected.b.emirate : `${selected.b.area}, ${selected.b.emirate}`}{selected.b.address ? ` · ${selected.b.address}` : ''}</p>

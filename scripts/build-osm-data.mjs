@@ -9,7 +9,7 @@ const cache = existsSync(CACHE) ? JSON.parse(readFileSync(CACHE, 'utf8')) : { em
 const save = () => writeFileSync(CACHE, JSON.stringify(cache));
 
 const EP = 'https://overpass-api.de/api/interpreter';
-const UA = 'dirham-desk-data-build (github.com/allnewrup/dxb-fx-compare)';
+const UA = 'dirham-desk-data-build (github.com/allnewrup/XD-XchangeDesk)';
 // Abu Dhabi's boundary is too large for the public server, so it is the default for anything outside the six below.
 const EMIRATES = { Ajman: 3766482, Dubai: 3766483, Fujairah: 3766484, 'Ras Al Khaimah': 3766485, Sharjah: 3766486, 'Umm Al Quwain': 3766487 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

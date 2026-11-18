@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mark, Stars, Icon } from './ui.jsx';
+import { Mark, Stars, Icon, ProviderLink } from './ui.jsx';
 import { fmtNum, rateDigits, ageLabel, isOpenNow, hoursLabel, directionsUrl, mapsUrl, reviewsUrl } from '../lib/pricing.js';
 
 function estimateLabel(quotedAt, live, daily) {
@@ -80,7 +80,7 @@ export default function ProviderCard({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-display text-xl font-bold uppercase tracking-wide text-ink leading-tight">
-                  {p.name}
+                  <ProviderLink provider={p} />
                 </h3>
                 {isTopPick && <span className="badge-gold">Rank #1 Best Value</span>}
                 {!isTopPick && badges.map((x) => (

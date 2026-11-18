@@ -30,17 +30,8 @@ export default function HeaderNav({
           onClick={(e) => { e.preventDefault(); onSelectTab('dashboard'); }}
           className="flex items-center gap-2.5 shrink-0 no-underline"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky text-white font-display text-lg font-bold tracking-wider shadow-sm">
-            FX
-          </span>
-          <span className="leading-none">
-            <span className="block font-display text-xl font-bold uppercase tracking-wide text-ink">
-              DXB <span className="text-sky">FX</span>
-            </span>
-            <span className="block text-[9px] font-bold uppercase tracking-[.16em] text-steel-500">
-              Xchange Desk Engine
-            </span>
-          </span>
+          <span className="badge-gold !rounded-lg !px-2.5 !py-1 !text-lg" aria-hidden="true">XD</span>
+          <span className="block font-display text-xl font-bold uppercase leading-none tracking-wide text-ink">Xchange Desk</span>
         </a>
 
         {/* Primary Navigation */}

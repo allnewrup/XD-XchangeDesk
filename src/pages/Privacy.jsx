@@ -7,8 +7,8 @@ const me = PAGES.find((p) => p.path === '/privacy');
 
 export default function Privacy() {
   return (
-    <PageShell path={me.path} title={me.title} desc={me.desc} updated={SITE.legalUpdated}>
-      <P>This policy explains what happens to information when you use {SITE.name} at {SITE.url}. The short version: there are no accounts, no advertising and no analytics trackers, we do not keep a database about you, and your location stays in your browser. Some third-party services do receive requests from your browser, and they are listed below.</P>
+    <PageShell path={me.path} title={me.title} desc={me.desc} updated={SITE.privacyUpdated}>
+      <P>This policy explains what happens to information when you use {SITE.name} at {SITE.url} and in the {SITE.name} mobile app (see "The mobile app" below). The short version: there are no accounts, no advertising and no analytics trackers, we do not keep a database about you, and your location stays in your browser. Some third-party services do receive requests from your browser, and they are listed below.</P>
 
       <H2>Who is responsible</H2>
       <P>{SITE.name} is run by {operatorPhrase()}. Contact: <A href={`mailto:${SITE.email}`}>{SITE.email}</A>.</P>
@@ -31,6 +31,17 @@ export default function Privacy() {
         <li>Anthropic processes this to provide the answer and handles it under its own terms and privacy policy, including its retention rules. See <A href="https://www.anthropic.com/legal/privacy">anthropic.com/legal/privacy</A>.</li>
         <li>We do not store the conversation on our servers. Please <strong className="text-ink">do not include personal or financial details</strong> in the chat, and do not rely on it for anything private.</li>
         <li>The assistant is optional. If you never open it, none of this happens.</li>
+      </UL>
+
+      <H2>The mobile app (iPhone and Android)</H2>
+      <P>The {SITE.name} app follows the same principles as the website: no accounts, no advertising, no analytics trackers, no database about you. It does not include the AI assistant, so nothing you do in the app is sent to Anthropic.</P>
+      <UL>
+        <li><strong className="text-ink">Stored on your phone:</strong> your last search, your saved currency pairs and the last known rates, so the app is quick and works offline. This never leaves your device; deleting the app removes it.</li>
+        <li><strong className="text-ink">Location:</strong> only if you tap "Near me" and allow it. It is used on your phone to sort branches by distance and to show your position on the map. It is <strong className="text-ink">not sent to us</strong> or to anyone else. You can withdraw permission at any time in your phone's Settings.</li>
+        <li><strong className="text-ink">Rate feeds:</strong> your phone contacts open.er-api.com, api.exchangerate-api.com, api.frankfurter.dev, cdn.jsdelivr.net and latest.currency-api.pages.dev directly, about once a minute while the app is open. They can see your IP address, as with any internet request. Our server on Vercel relays the Yahoo Finance feed, so Yahoo sees our server, not you; Vercel records standard request data (IP address, time) for security and operation.</li>
+        <li><strong className="text-ink">Map:</strong> the background map is loaded from OpenFreeMap (tiles.openfreemap.org) when you open the Map tab. It sees your IP address and which map tiles you load (which reveals roughly the area you are looking at), but not your search, and it never receives your coordinates directly.</li>
+        <li><strong className="text-ink">Links:</strong> "Directions" and review links open Google Maps or your browser only when you tap them, under Google's own privacy policy.</li>
+        <li><strong className="text-ink">App stores:</strong> Apple's App Store and Google Play collect their own information when you download or update the app, under their own policies. We do not receive your identity from them.</li>
       </UL>
 
       <H2>Third parties that receive requests from your browser</H2>
@@ -56,7 +67,7 @@ export default function Privacy() {
       <H2>Your choices and rights</H2>
       <UL>
         <li>Clear the map language and chat by clearing site data in your browser, or press "New chat".</li>
-        <li>Deny or withdraw location permission in your browser.</li>
+        <li>Deny or withdraw location permission in your browser or, in the app, in your phone's Settings.</li>
         <li>Skip the assistant and nothing is sent to Anthropic.</li>
         <li>Because we do not keep a database of visitors, there is usually nothing for us to look up. If you believe we hold information about you, or you want an email deleted, write to <A href={`mailto:${SITE.email}`}>{SITE.email}</A> and we will help, as far as the law that applies to you provides.</li>
       </UL>

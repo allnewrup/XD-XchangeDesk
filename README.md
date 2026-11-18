@@ -76,8 +76,8 @@ A header badge shows a mini QR code. Clicking it opens a full-screen modal with 
 Requirements: **Node.js 18 or newer** and npm.
 
 ```bash
-git clone <your-repo-url> dxb-fx-compare
-cd dxb-fx-compare
+git clone https://github.com/allnewrup/XD-XchangeDesk.git
+cd XD-XchangeDesk
 npm install
 npm run dev
 ```
@@ -147,7 +147,7 @@ To use real counter rates, replace the spread model in `quote()` with rates you 
 ## Project structure
 
 ```
-dxb-fx-compare/
+XD-XchangeDesk/
 ├── index.html                    Fonts and root element
 ├── vite.config.js                Vite + React, the /api/yahoo proxy, and a dev route for /api/chat
 ├── vercel.json                   Yahoo rewrite and the chat function's time limit

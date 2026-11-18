@@ -28,6 +28,7 @@ import MultiTransferModal from './components/MultiTransferModal.jsx';
 const MapPanel = lazy(() => import('./components/MapPanel.jsx'));
 import { QrModal } from './components/QrBadge.jsx';
 import ChatLauncher from './components/ChatLauncher.jsx';
+import { ProviderLink } from './components/ui.jsx';
 import { useRoute, Link } from './lib/router.jsx';
 import { SiteNav } from './pages/PageShell.jsx';
 
@@ -625,7 +626,7 @@ export default function App() {
                         <li key={x.b.id} className="well flex flex-col justify-between gap-1.5 p-3">
                           <div className="flex items-center gap-2">
                             <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-go text-[11px] font-bold text-white">{i + 1}</span>
-                            <strong className="min-w-0 truncate text-xs text-ink">{x.p.name}</strong>
+                            <strong className="min-w-0 truncate text-xs text-ink"><ProviderLink provider={x.p} /></strong>
                           </div>
                           <p className="text-xs text-steel-600">
                             {x.b.area} · <strong className="text-ink">{x.dist < 1 ? `${Math.round(x.dist * 1000)} m` : `${x.dist.toFixed(1)} km`}</strong> · {fmtNum(x.rate, x.digits)}
@@ -746,11 +747,9 @@ export default function App() {
         <footer className="border-t border-steel-200 bg-white">
           <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-4 py-4 text-xs text-steel-500 sm:px-6">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="font-display text-sm font-bold uppercase tracking-wide text-ink">
-                DXB <span className="text-sky">FX</span>
-              </span>
+              <span className="font-display text-sm font-bold uppercase tracking-wide text-ink">Xchange Desk</span>
               <span className="font-semibold uppercase tracking-wider text-steel-600">
-                Xchange Desk · UAE Exchange Comparison Terminal
+                UAE exchange rate comparison
               </span>
               <span className="hidden md:inline text-steel-300" aria-hidden="true">|</span>
               <span className="hidden md:inline">

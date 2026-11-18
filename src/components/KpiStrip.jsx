@@ -1,6 +1,5 @@
 import React from 'react';
 import { rateDigits } from '../lib/pricing.js';
-import { buildTrendSeries } from '../lib/analytics.js';
 
 function liveFreshnessLabel(updatedAt, nowMs, pairDaily, live) {
   if (!live || !updatedAt) return 'Syncing…';
@@ -13,10 +12,11 @@ function liveFreshnessLabel(updatedAt, nowMs, pairDaily, live) {
 export default function KpiStrip({ s, mid, prevMid, metrics, pairDaily, updatedAt, live, liveSeries24h, nowMs }) {
   const pairMid = (mid[s.to] && mid[s.from]) ? mid[s.to] / mid[s.from] : 1;
   const digits = rateDigits(pairMid);
-  const series = liveSeries24h ?? buildTrendSeries(pairMid, s.from, s.to, '24H');
+  // Only real history is drawn; with none, the sparkline and the change figure are simply left out.
+  const series = liveSeries24h ?? { points: [], min: 0, max: 0, deltaPct: 0 };
 
   const prevPairMid = (prevMid?.[s.to] && prevMid?.[s.from]) ? prevMid[s.to] / prevMid[s.from] : null;
-  const deltaPct = prevPairMid ? ((pairMid - prevPairMid) / prevPairMid) * 100 : series.deltaPct;
+  const deltaPct = prevPairMid ? ((pairMid - prevPairMid) / prevPairMid) * 100 : liveSeries24h ? series.deltaPct : null;
 
   // Build SVG polyline points
   const w = 220;
@@ -47,13 +47,13 @@ export default function KpiStrip({ s, mid, prevMid, metrics, pairDaily, updatedA
               {s.from} / {s.to} Mid-Market
             </div>
           </div>
-          <span className={`rounded px-2 py-0.5 font-mono text-[11px] font-bold border tabular-nums ${
+          {deltaPct != null && <span className={`rounded px-2 py-0.5 font-mono text-[11px] font-bold border tabular-nums ${
             deltaPct >= 0
               ? 'bg-emerald-50 text-go border-emerald-200'
               : 'bg-red-50 text-red-600 border-red-200'
           }`}>
             {deltaPct >= 0 ? '+' : ''}{deltaPct.toFixed(2)}%
-          </span>
+          </span>}
         </div>
 
         <div className="mt-2 flex items-baseline gap-2">
@@ -70,9 +70,9 @@ export default function KpiStrip({ s, mid, prevMid, metrics, pairDaily, updatedA
             <polyline fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={svgPts} />
           </svg>
           <div className="mt-1 flex items-center justify-between text-[11px] font-mono text-steel-500 tabular-nums">
-            <span>Low: {min.toFixed(digits)}</span>
+            <span>{liveSeries24h ? `Low: ${min.toFixed(digits)}` : ''}</span>
             <span className="text-go font-semibold">{liveFreshnessLabel(updatedAt, nowMs, pairDaily, live)}</span>
-            <span>High: {max.toFixed(digits)}</span>
+            <span>{liveSeries24h ? `High: ${max.toFixed(digits)}` : ''}</span>
           </div>
         </div>
       </div>

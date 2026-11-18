@@ -49,6 +49,6 @@ const chatApi = () => ({
 export default defineConfig({
   define,
   plugins: [react(), chatApi()],
-  server: { host: '0.0.0.0', port: 3000, allowedHosts: true, proxy: yahoo },
-  preview: { host: '0.0.0.0', port: 3000, allowedHosts: true, proxy: yahoo },
+  server: { proxy: yahoo },
+  preview: { proxy: yahoo },
 });

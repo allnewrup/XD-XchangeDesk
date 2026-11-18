@@ -78,8 +78,7 @@ export default async function handler(req, res) {
   if (origin) {
     let host = '';
     try { host = new URL(origin).host; } catch { /* handled below */ }
-    const fwdHost = String(req.headers['x-forwarded-host'] || '').split(',')[0].trim();
-    if (host !== req.headers.host && (!fwdHost || host !== fwdHost)) { res.status(403).json({ error: 'forbidden' }); return; }
+    if (host !== req.headers.host) { res.status(403).json({ error: 'forbidden' }); return; }
   }
 
   if (!process.env.ANTHROPIC_API_KEY) { res.status(503).json({ error: 'not_configured' }); return; }

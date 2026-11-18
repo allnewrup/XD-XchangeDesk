@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { quote, convert, midRate, emiratesForArea, areaForEmirates } from './pricing.js';
 import { deriveRows, sortRows, applyPatch } from './results.js';
-import { computeDashboardMetrics, buildTrendSeries, computeMultiTransferComparison } from './analytics.js';
+import { computeDashboardMetrics, computeMultiTransferComparison } from './analytics.js';
 import { mergeSpotIntoSnapshot, buildCrossHistorySeries, evaluateTriggeredAlerts } from './liveRates.js';
 import { buildComparisonCsv } from './exportCsv.js';
 import { SEED_MID_PER_AED, PROVIDERS, EMIRATES } from '../data/seed.js';
@@ -91,14 +91,6 @@ test('computeDashboardMetrics calculates savings, spread tiers, and emirate cove
   assert.equal(metrics.totalBranches, mockData.providers.reduce((a, p) => a + p.branches.length, 0));
   assert.ok(metrics.spreadTiers.length >= 3);
   assert.equal(metrics.spreadTiers[0].id, 'interbank');
-});
-
-test('buildTrendSeries anchors final point on live mid rate', () => {
-  const liveMid = midRate(mockData.mid, 'AED', 'INR');
-  const series = buildTrendSeries(liveMid, 'AED', 'INR', '7D');
-  assert.equal(series.points.length, 14);
-  assert.equal(series.points[series.points.length - 1], liveMid);
-  assert.ok(series.min <= liveMid && series.max >= liveMid);
 });
 
 test('computeMultiTransferComparison shows bank fee penalty when splitting transfers', () => {

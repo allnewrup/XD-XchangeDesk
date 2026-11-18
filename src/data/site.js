@@ -2,12 +2,13 @@
 // Edit here; every page picks it up.
 export const SITE = {
   name: 'Xchange Desk',
-  url: 'https://dxb-fx-compare.vercel.app',
+  url: 'https://xd-xchange-desk.vercel.app',
   email: 'xchangedesk@gmail.com',
   // Legal name of the person or company that runs the site, shown on About, Contact, Privacy and Terms ("run by <operator>"). Leave '' to say "an independent business".
   operator: '',
   // Date the Privacy Policy and Terms were last changed. Update it whenever you change their text.
   legalUpdated: '11 November 2026',
+  privacyUpdated: '18 November 2026',
 };
 
 export const PAGES = [

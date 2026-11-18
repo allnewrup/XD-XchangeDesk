@@ -4,7 +4,7 @@
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 
 const LANGS = ['en', 'ar', 'bn', 'ta', 'ml', 'hi', 'ur'];
-const UA = 'dirham-desk-data-build (github.com/allnewrup/dxb-fx-compare)';
+const UA = 'dirham-desk-data-build (github.com/allnewrup/XD-XchangeDesk)';
 const CACHE = new URL('./.places-cache.json', import.meta.url);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

@@ -1,4 +1,4 @@
-// Pure dashboard analytics, spread transparency metrics, trend curve synthesis, and multi-transfer math.
+// Pure dashboard analytics, spread transparency metrics and multi-transfer math.
 // Decoupled from React components so all calculations are unit-tested deterministically.
 import { rateDigits } from './pricing.js';
 
@@ -96,44 +96,6 @@ export function computeDashboardMetrics(rows, s, allProviders = []) {
     emirateBreakdown,
     spreadTiers,
   };
-}
-
-/**
- * Generates a deterministic reference curve anchored to the live mid-market rate
- * for the selected pair and timeframe ('24H' | '7D' | '1M').
- */
-export function buildTrendSeries(midRate, from, to, range = '24H') {
-  if (!Number.isFinite(midRate) || midRate <= 0) {
-    return { points: [], min: 0, max: 0, deltaPct: 0, labels: [] };
-  }
-  const count = range === '24H' ? 12 : range === '7D' ? 14 : 16;
-  const amp = range === '24H' ? 0.0032 : range === '7D' ? 0.0075 : 0.014;
-  let hash = 0;
-  for (const ch of `${from}${to}${range}`) hash = (hash * 31 + ch.charCodeAt(0)) % 997;
-
-  const points = [];
-  for (let i = 0; i < count; i++) {
-    const t = i / (count - 1);
-    const wave = Math.sin((t * 2.6 + (hash % 7) * 0.4) * Math.PI) * 0.55 + Math.cos((t * 4.3 + (hash % 5) * 0.3) * Math.PI) * 0.25;
-    // Anchor final point directly on the live midRate
-    const offset = (1 - t) * (wave * amp - amp * 0.35);
-    points.push(midRate * (1 + offset));
-  }
-  points[points.length - 1] = midRate;
-
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const first = points[0];
-  const deltaPct = first > 0 ? ((midRate - first) / first) * 100 : 0;
-  const digits = rateDigits(midRate);
-
-  const labels = range === '24H'
-    ? ['00:00 GST', '08:00 GST', '16:00 GST', 'Live Now']
-    : range === '7D'
-      ? ['6d ago', '4d ago', '2d ago', 'Today']
-      : ['30d ago', '20d ago', '10d ago', 'Today'];
-
-  return { points, min, max, deltaPct, digits, labels };
 }
 
 /**

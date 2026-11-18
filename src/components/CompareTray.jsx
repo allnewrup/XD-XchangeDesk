@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Mark, Icon } from './ui.jsx';
+import { Mark, Icon, ProviderLink } from './ui.jsx';
 import { fmtNum, rateDigits, hoursLabel } from '../lib/pricing.js';
 import { downloadComparisonCsv } from '../lib/exportCsv.js';
 
@@ -70,7 +70,7 @@ export default function CompareTray({ rows, s, open, onClose, onRemove, onClear 
                   <th key={r.provider.id} className={`${cell} min-w-[170px]`}>
                     <div className="flex items-center gap-2">
                       <Mark provider={r.provider} size={30} />
-                      <span className="font-display text-base font-bold leading-tight tracking-wide text-ink">{r.provider.name}</span>
+                      <span className="font-display text-base font-bold leading-tight tracking-wide text-ink"><ProviderLink provider={r.provider} /></span>
                       <button
                         type="button"
                         aria-label={`Remove ${r.provider.name}`}

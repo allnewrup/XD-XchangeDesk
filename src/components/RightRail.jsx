@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import { Link } from '../lib/router.jsx';
-import { buildTrendSeries } from '../lib/analytics.js';
 import ReviewsDrawer from './ReviewsDrawer.jsx';
 
 export default function RightRail({
@@ -26,7 +25,8 @@ export default function RightRail({
   liveTrendSeries,
 }) {
   const pairMid = (data.mid[s.to] && data.mid[s.from]) ? data.mid[s.to] / data.mid[s.from] : 1;
-  const series = liveTrendSeries ?? buildTrendSeries(pairMid, s.from, s.to, trendRange);
+  // Only real history is ever drawn. If the feed has nothing for this pair, say so instead of inventing a curve.
+  const series = liveTrendSeries ?? { points: [], min: 0, max: 0, deltaPct: 0, labels: [], digits: 4 };
 
   // Trend SVG geometry
   const w = 320;
@@ -81,6 +81,7 @@ export default function RightRail({
           </div>
         </div>
 
+{liveTrendSeries && (
         <div className="mt-3 flex items-baseline justify-between text-xs">
           <span className="font-mono text-steel-600 tabular-nums">
             Peak: <strong className="text-ink">{series.max.toFixed(series.digits)}</strong>
@@ -89,8 +90,12 @@ export default function RightRail({
             {series.deltaPct >= 0 ? '+' : ''}{series.deltaPct.toFixed(2)}% ({trendRange})
           </span>
         </div>
+        )}
 
         <div className="mt-2 rounded-lg border border-steel-100 bg-steel-50/60 p-2">
+          {!liveTrendSeries ? (
+            <p className="flex h-28 items-center justify-center px-4 text-center text-xs text-steel-500" role="status">No price history to show yet. It is still loading, or the feed has nothing for this pair.</p>
+          ) : (<>
           <svg viewBox={`0 0 ${w} ${h}`} className="h-28 w-full overflow-visible" aria-hidden="true">
             <defs>
               <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
@@ -110,14 +115,15 @@ export default function RightRail({
           <div className="mt-1 flex items-center justify-between text-[10px] font-mono text-steel-500">
             {series.labels.map((lbl) => <span key={lbl}>{lbl}</span>)}
           </div>
+          </>)}
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-2 text-xs">
           <span className="text-steel-500">
-            {liveTrendSeries ? 'Yahoo FX historical closes:' : 'Anchored to live mid-rate:'}
+            {liveTrendSeries ? 'Yahoo FX historical closes:' : 'Price history:'}
           </span>
           <span className="rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-go border border-emerald-200">
-            {data.liveHost ? (liveTrendSeries ? 'Live FX History' : 'Live Market Sync') : 'Syncing…'}
+            {liveTrendSeries ? 'Live FX History' : 'Unavailable'}
           </span>
         </div>
       </section>

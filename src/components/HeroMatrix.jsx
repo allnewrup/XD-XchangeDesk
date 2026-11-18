@@ -55,7 +55,7 @@ export default function HeroMatrix({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-[.1em]">
-            <span className="rounded bg-sky/10 px-2 py-0.5 text-sky">DXB Terminal</span>
+            <span className="rounded bg-sky/10 px-2 py-0.5 text-sky">Xchange Desk</span>
             <span className="text-steel-500">Live UAE Comparison Engine</span>
             <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[10px] text-go border border-emerald-200">
               <span className="h-1.5 w-1.5 rounded-full bg-go animate-pulse" aria-hidden="true" />
