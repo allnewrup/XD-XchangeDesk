@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// maplibre-gl 6 loads its tile worker from a separate file. Vite bundles that file for us and we point the map at it.
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+
+maplibregl.setWorkerUrl(workerUrl);
 import { fmtNum, directionsUrl } from '../lib/pricing.js';
 import { ProviderLink } from './ui.jsx';
 import places from '../data/map-places.json';
