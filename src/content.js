@@ -79,7 +79,7 @@ export const DOCS = {
       { p: 'Only if you tap “Near me” and allow it. It is used on your phone to sort branches by distance and to show your position on the map. It is not sent to us. You can withdraw permission any time in your phone’s Settings.' },
       { h: 'Network requests your phone makes' },
       { li: [
-        'Rate feeds, directly from your phone: open.er-api.com, api.frankfurter.dev, cdn.jsdelivr.net and latest.currency-api.pages.dev. They can see your IP address, as with any internet request.',
+        'Rate feeds, directly from your phone: open.er-api.com, api.exchangerate-api.com, api.frankfurter.dev, cdn.jsdelivr.net and latest.currency-api.pages.dev. They can see your IP address, as with any internet request.',
         'Our server (hosted on Vercel) relays the Yahoo Finance rate feed. Vercel records standard request data such as IP address and time for security and operation; we do not use it to identify or profile you.',
         'The map background is loaded from OpenFreeMap (tiles.openfreemap.org), which sees your IP address when the Map tab loads map tiles. It does not receive your search or your location.',
         'Directions and review links open Google Maps or your browser only when you tap them.',
