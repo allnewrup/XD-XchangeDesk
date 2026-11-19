@@ -1,6 +1,7 @@
 import React from 'react';
 import { AREAS } from '../data/seed.js';
 import { Icon } from './ui.jsx';
+import { APP_DOWNLOAD_URL } from './QrBadge.jsx';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -117,7 +118,7 @@ export default function HeaderNav({
             )}
           </button>
 
-          <button
+          {APP_DOWNLOAD_URL && <button
             type="button"
             onClick={onOpenQr}
             aria-label="Open mobile app QR code"
@@ -125,10 +126,10 @@ export default function HeaderNav({
           >
             <Icon.qr width="15" height="15" className="text-sky shrink-0" />
             <span className="leading-tight">
-              <span className="block text-[11px] font-bold text-ink">UAE Desk</span>
+              <span className="block text-[11px] font-bold text-ink">Xchange Desk</span>
               <span className="block text-[9px] font-semibold uppercase tracking-wider text-steel-500">Mobile QR</span>
             </span>
-          </button>
+          </button>}
         </div>
       </div>
     </header>

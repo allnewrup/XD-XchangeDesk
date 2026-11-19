@@ -1,332 +1,478 @@
-# Xchange Desk
+<div align="center">
 
-**Compare money exchange rates across Dubai and Abu Dhabi, side by side.**
+<img src="docs/banner.png" alt="Xchange Desk — foreign exchange, side by side" width="100%" />
 
-Xchange Desk is a React single-page app that lines up UAE exchange houses and banks (127 providers and about 890 branches across all seven emirates, including Al Ansari, Al Fardan, LuLu, UAE Exchange, Orient, Travelex, Emirates NBD and FAB) the way Skyscanner lines up flights: one search bar, quick filters, sortable result cards, a map and an AI assistant. The interface is skeuomorphic, with recessed input wells, raised metal buttons, slide switches and split-flap rate boards.
+<br/>
 
-![Xchange Desk screenshot](docs/screenshot.png)
+**Compare estimated money-exchange rates across every major exchange house and bank in the UAE — on the web, on iPhone and on Android.**
+
+<br/>
+
+[![Live website](https://img.shields.io/badge/%F0%9F%8C%90%20Live%20site-xd--xchange--desk.vercel.app-d4a62a?style=for-the-badge&labelColor=1b232b)](https://xd-xchange-desk.vercel.app)
+[![Hosted on Vercel](https://img.shields.io/badge/Hosted%20on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/veri-talent/xd-xchange-desk)
+[![Mobile app](https://img.shields.io/badge/Mobile-Expo%20%C2%B7%20iOS%20%26%20Android-4630eb?style=for-the-badge&logo=expo&logoColor=white)](mobile/)
+
+![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss&logoColor=white)
+![MapLibre](https://img.shields.io/badge/MapLibre%20GL-6-396cb2)
+![Expo](https://img.shields.io/badge/Expo%20SDK-58-000020?logo=expo&logoColor=white)
+![Claude](https://img.shields.io/badge/Assistant-Claude%20Haiku%205.5-d97757)
+![Providers](https://img.shields.io/badge/Providers-127-2ea44f)
+![Branches](https://img.shields.io/badge/Branches-~890-2ea44f)
+![No ads](https://img.shields.io/badge/Ads%20%C2%B7%20Trackers%20%C2%B7%20Accounts-none-lightgrey)
+
+</div>
 
 ---
 
 ## Contents
 
-- [What it does](#what-it-does)
-- [Quick start](#quick-start)
-- [Data: what is live and what is not](#data-what-is-live-and-what-is-not)
-- [How rates are calculated](#how-rates-are-calculated)
-- [Project structure](#project-structure)
-- [Configuration](#configuration)
-- [Connecting real Google data](#connecting-real-google-data)
-- [Deploying](#deploying)
-- [Customising](#customising)
-- [Design notes](#design-notes)
-- [Known limitations](#known-limitations)
-- [Roadmap](#roadmap)
-- [Disclaimer](#disclaimer)
+- [Quick links](#-quick-links)
+- [What it is](#-what-it-is)
+- [Screenshots](#-screenshots)
+- [Features](#-features)
+- [How it works](#-how-it-works)
+- [Where the numbers come from](#-where-the-numbers-come-from)
+- [How a provider's rate is estimated](#-how-a-providers-rate-is-estimated)
+- [The AI assistant](#-the-ai-assistant-ask-xchange)
+- [Run the website locally](#-run-the-website-locally)
+- [Configuration](#-configuration)
+- [Deploy to Vercel](#-deploy-to-vercel)
+- [The mobile app](#-the-mobile-app)
+- [Project structure](#-project-structure)
+- [Privacy and security](#-privacy-and-security)
+- [Status and honest limitations](#-status-and-honest-limitations)
+- [Roadmap](#-roadmap)
+- [Credits and data licences](#-credits-and-data-licences)
+- [Disclaimer](#-disclaimer)
 
 ---
 
-## What it does
+## 🔗 Quick links
 
-### Search console
-- **Currency pair** with a swap button: AED, USD, EUR, GBP, INR, PHP, PKR, SAR. Choosing the currency already set on the other side swaps them.
-- **Amount** to exchange. Every card recalculates as you type.
-- **Transaction type** with two slide switches:
-  - *Sell AED / Buy AED*: you hand over the base currency, or you buy it.
-  - *Cash / Bank transfer*: bank transfers get a tighter spread and a flat fee.
-- **Emirate and area**: All UAE, Dubai only, Abu Dhabi only, or a neighbourhood (Deira, Bur Dubai, Marina, Downtown, Corniche, Mussafah).
-- **Refresh live web rates** button, plus automatic refresh on load and every 60 seconds.
+| What | Where |
+| --- | --- |
+| 🌐 **Website** | **<https://xd-xchange-desk.vercel.app>** |
+| ▲ **Vercel project** (hosting, deployments, environment variables) | <https://vercel.com/veri-talent/xd-xchange-desk> |
+| 💻 **GitHub repository** | <https://github.com/allnewrup/Xchange-Desk-Foreign-Exchange> |
+| 📱 **Mobile app builds** (Expo / EAS) | <https://expo.dev/accounts/xchangedesk/projects/xchange-desk> |
+| 🗄️ **Database** | **None.** The site has no database and no user accounts, so there is no Supabase (or any other database) behind it. Hosting is Vercel only. |
+| ✉️ **Contact** | [xchangedesk@gmail.com](mailto:xchangedesk@gmail.com) |
 
-### Results
-- **Three quick-sort tabs** in the Skyscanner style: *Best Rate*, *Highest Rated*, *Closest / Most Branches*. Each tab shows its current winner as a summary line.
-  - *Closest* ranks by distance from the selected neighbourhood. With a whole-emirate filter it ranks by branch count.
-- **Provider cards** show the logo plate, the nearest matching branch, an open/closed pill (UAE time), branch chips to switch branch, a split-flap board with estimated *Sell* and *Buy* rates, the converted total, fee, savings against the worst offer, the cost versus the mid-market rate, and the age of the market quote.
-- **Metal badges** mark *Best rate* (gold), *Top rated* (steel) and *Most branches* (copper).
-- **Side-by-side tray**: tick "Compare side-by-side" on 2 to 4 cards and a pinned multi-column table opens. The best value in each row is highlighted.
-- **Left sidebar filters**: open now, emirate checkboxes, sort order, reset.
-
-### Map
-- **Rate pins map** is a real vector map (MapLibre on OpenFreeMap tiles). Every filtered branch is a tag carrying the provider mark and the rate for your transaction, and the tag's pointer sits exactly on the branch coordinate. Tags that would overlap group into a count circle; click it to zoom in.
-- **Map language**: English, Arabic, Bengali, Tamil, Malayalam, Hindi or Urdu (remembered in the browser, and defaulted from the browser language), plus a "Standard map" option with street names in the local language. The base map has all of its own text removed and the app draws city, town and district labels itself, so every script renders correctly. Names come only from OpenStreetMap `name:xx` tags and Wikidata labels (built by `node scripts/build-map-places.mjs`); nothing is machine-translated. A place with no name in the chosen language is shown in English, and the panel says how many places have one (English 1,041, Arabic 974, Malayalam 254, Urdu 82, Bengali 22, Hindi 16, Tamil 14, out of 1,048). The Google Maps embed follows the same language.
-- **Use my location** (browser geolocation) marks you on the map, features the three nearest branches with straight-line distances, shows a distance on each card and re-ranks the "Closest" sort.
-- **Google Maps button** opens an embed of the selected branch in place, and minimizes back into a button.
-- **Get directions** on every branch deep-links to Google Maps navigation.
-- **No ratings or reviews are shown.** There is no live, licensed source for them and none are invented. Each card links to the provider's reviews on Google Maps. The rating filter, "Top rated" sort, rating row and reviews drawer are kept in the code and switch on automatically once a provider has a real rating (see *Connecting real Google data*).
-
-### Ask Xchange (AI assistant)
-
-A floating **Ask Xchange** button opens a chat panel. The assistant can answer questions *and* operate the page: "best rate for 1,000 USD to AED near Deira, open now", "compare the top three", "banks open now in Sharjah", "closest to me", "what should I bring?". It replies in the user's language.
-
-- **Model:** Claude Haiku 5.5 (`claude-haiku-5-5`), thinking off, 1,024 output tokens per reply. Change it in `src/lib/chatSpec.js`.
-- **Tools** run in the browser, on the same state and calculation code the page uses: `update_search`, `get_results`, `get_provider_details`, `compare_providers`, `show_on_map`, `find_nearest`. Tool inputs are validated before anything changes; bad input is returned to the model as an error and changes nothing.
-- **No invented numbers:** every figure the assistant quotes comes from a tool result. Provider rates stay labelled as estimates, it never states a rating or review, and missing hours as "not listed".
-- **Privacy:** the conversation is sent to Anthropic to produce answers. The server keeps no chat log, and the browser keeps the chat only in `sessionStorage` for the tab. Coordinates are never sent; the model only sees distances.
-
-### Information pages
-
-About, Methodology, Data sources (with live per-source update times), Contact, Privacy Policy and Terms of Service live at `/about`, `/methodology`, `/sources`, `/contact`, `/privacy` and `/terms`. They are lazy-loaded React pages behind a small History-API router (`src/lib/router.jsx`), with a rewrite in `vercel.json` so each path can be opened or shared directly. The app stays mounted while one is open, so filters, chat and map survive a visit. Business details (contact email, operator name, policy date) are in `src/data/site.js`. The footer shows when market rates and branch data were last updated.
-
-### Mobile app QR code
-A header badge shows a mini QR code. Clicking it opens a full-screen modal with a large scannable code ("Scan to download for iOS & Android").
+> The earlier address `dxb-fx-compare.vercel.app` no longer exists. Use the link above.
 
 ---
 
-## Quick start
+## 💡 What it is
 
-Requirements: **Node.js 18 or newer** and npm.
+**Xchange Desk** lines up UAE exchange houses and banks the way a flight-search site lines up airlines: one search, quick filters, sortable cards, a map, and an AI assistant that can operate the page for you.
+
+- **127 providers and about 890 branches** across all seven emirates (95 exchange houses and 32 banks), including Al Ansari, Al Fardan, LuLu, Al Rostamani, Joyalukkas, Orient, Emirates NBD, FAB, ADCB, Mashreq and more.
+- **Live market rates**, cross-checked across four independent public feeds.
+- **Provider rates are clearly labelled estimates** (market rate plus a modelled spread). Exchange houses do not publish live rates, and the site never pretends otherwise.
+- **No accounts, no ads, no analytics trackers, no database.**
+- Independent: not affiliated with any provider it lists.
+
+This repository holds **both products**:
+
+| Folder | What | Stack |
+| --- | --- | --- |
+| [`/`](.) (repository root) | The website and its two serverless functions | React 19 · Vite 8 · Tailwind 3 · MapLibre GL · Vercel Functions |
+| [`/mobile`](mobile) | The iPhone and Android app | Expo SDK 58 · React Native 0.88 · MapLibre Native |
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+**Dashboard**
+
+<img src="docs/screenshots/dashboard.jpg" alt="Xchange Desk dashboard: live ticker, comparison matrix and KPI strip" width="100%" />
+
+<br/><br/>
+
+**Provider cards** — the name links to the company's official website
+
+<img src="docs/screenshots/providers.jpg" alt="A provider card with estimated rate, fee, branch and compare checkbox" width="100%" />
+
+<br/><br/>
+
+<table>
+  <tr>
+    <td align="center" width="50%"><b>Branch map</b><br/><img src="docs/screenshots/map.jpg" alt="Branch map with clustered pins" /></td>
+    <td align="center" width="50%"><b>Real rate history</b><br/><img src="docs/screenshots/trend.jpg" alt="Historical trendline, real closes only" /></td>
+  </tr>
+  <tr>
+    <td align="center" width="50%"><b>On a phone screen</b><br/><img src="docs/screenshots/mobile.jpg" alt="The website at phone width" width="260" /></td>
+    <td align="center" width="50%"><b>The mobile app icon</b><br/><img src="docs/app-icon.png" alt="Xchange Desk app icon" width="200" /></td>
+  </tr>
+</table>
+
+<br/>
+
+**Privacy policy page**
+
+<img src="docs/screenshots/privacy.jpg" alt="The privacy policy page" width="80%" />
+
+</div>
+
+---
+
+## ✨ Features
+
+### 🌐 Website
+
+| Area | What you get |
+| --- | --- |
+| **Dashboard** | Live ticker for six corridors, a comparison matrix (currency pair, amount, sell/buy, cash/bank, area), and KPI tiles: interbank reference, best available margin, average bank transfer fee, branch footprint. |
+| **Live comparison** | Sortable provider cards with estimated Sell and Buy rates, total received or paid, fee, open/closed now (UAE time), nearest branch, and savings against the worst offer. Filters for exchange houses, banks, open now, and emirate. |
+| **Side-by-side tray** | Tick 2 to 4 providers and compare them in a pinned table. **Export the comparison to CSV.** |
+| **Rate alerts** | Set a target rate for a pair. When the live market rate crosses it, the page highlights the alert. Alerts are saved **in your browser only** and are checked **while the page is open**. |
+| **Historical trends** | 24 hour, 7 day and 1 month charts built from **real Yahoo Finance closes**. If the feed has nothing for a pair, the chart says so instead of drawing a made-up line. |
+| **Multi-transfer calculator** | Shows what you pay in fees if you split a remittance into several smaller transfers instead of sending it once. |
+| **Spread transparency meter** | How far each category (profiled exchange houses, other exchange houses, banks) typically sits from the mid-market rate. |
+| **Branch map** | MapLibre vector map on OpenFreeMap tiles. Every branch is a tag showing the provider and its rate; nearby tags group into numbered circles. Map labels in English, Arabic, Bengali, Tamil, Malayalam, Hindi or Urdu. "Use my location" shows the three nearest branches. |
+| **Directions & reviews** | One tap to Google Maps directions, or to a provider's reviews on Google. Ratings and reviews are **never invented or shown** (see [limitations](#-status-and-honest-limitations)). |
+| **Official website links** | 28 well-known providers link to their official site (hand-checked on 18 Nov 2026); everything unconfirmed stays plain text. |
+| **Ask Xchange** | A Claude-powered assistant that answers questions **and** operates the page. [Details below.](#-the-ai-assistant-ask-xchange) |
+| **Information pages** | About, Methodology, Data sources (with live update times), Contact, Privacy Policy, Terms of Service. |
+| **Keyboard shortcuts** | `/` focus search · `r` refresh rates · `s` swap currencies. |
+| **Accessible** | Native controls, visible focus rings, ARIA states, reduced-motion support, works down to phone width. |
+
+### 📱 Mobile app (iPhone and Android)
+
+- **Compare** tab: 203 currencies (searchable), amount, sell/buy, cash/bank, area, filters, "Near me", pull-to-refresh, a "Best right now" card and a live market board with its age and source agreement.
+- **Map** tab: native map (MapLibre + OpenFreeMap, **no API key, no billing account**) with the matching branches; green pin is the best rate; tap a pin for details and directions.
+- **Provider** screen: the estimate with the market rate, modelled spread and fee; every branch with hours and distance.
+- **Saved** pairs with live rates, and an **offline mode** that shows the last known rates, clearly labelled.
+- **More**: About, how rates are calculated, live data-source status, Contact, Privacy, Terms.
+
+---
+
+## 🧭 How it works
+
+```mermaid
+flowchart LR
+    subgraph Clients
+        W["🌐 Website<br/>React + Vite"]
+        M["📱 Mobile app<br/>Expo · React Native"]
+    end
+
+    subgraph Vercel["▲ Vercel — xd-xchange-desk"]
+        Y["/api/yahoo<br/>rate relay"]
+        C["/api/chat<br/>Claude relay · holds the API key"]
+    end
+
+    subgraph Public["Public data sources"]
+        YF["Yahoo Finance<br/>FX spot + history"]
+        F["ECB / Frankfurter"]
+        E["open.er-api.com"]
+        FA["fawazahmed0<br/>currency-api"]
+        OFM["OpenFreeMap<br/>map tiles"]
+    end
+
+    AI["Anthropic<br/>Claude Haiku 5.5"]
+
+    W -->|"rates, history"| Y --> YF
+    M -->|"rates"| Y
+    W --> F & E & FA
+    M --> F & E & FA
+    W & M --> OFM
+    W -->|"chat"| C --> AI
+```
+
+**Design rules that shape the code**
+
+1. **No server-side user data.** The server functions are stateless relays. Nothing about a visitor is stored.
+2. **The browser runs the tools.** When the assistant "does" something (changes the search, compares providers, flies the map), the *page* executes it against live state; the server only forwards messages. Tool inputs are validated first.
+3. **Never invent a number.** Every figure comes from a feed or a calculation, and anything estimated says so.
+
+---
+
+## 📊 Where the numbers come from
+
+```mermaid
+flowchart LR
+    A["Yahoo Finance<br/>(minute-level, major currencies)"] --> X
+    B["ECB via Frankfurter<br/>(daily, ~30)"] --> X
+    C["open.er-api.com<br/>(daily, ~160)"] --> X
+    D["fawazahmed0<br/>(daily, 300+)"] --> X
+    X{"Cross-check<br/>a quote survives only if<br/>another source agrees<br/>(within 0.25% + market drift)"} --> M["Market (mid) rate<br/>freshest surviving quote"]
+    M --> S["+ modelled provider spread"] --> P["Estimated provider rate"]
+```
+
+| Data | Source | Status |
+| --- | --- | --- |
+| **Market (mid) rate** | The four feeds above, cross-checked | **Live where possible.** The UI shows the source, the quote age and how many sources agreed. Daily-only currencies are labelled "daily reference rate". On weekends the quote is the last close. |
+| **Provider rates (Sell/Buy)** | Market rate + a modelled spread | **Estimated.** No exchange house publishes a rates API, so genuine counter rates cannot be collected legitimately. |
+| **Providers, branches, addresses, hours** | [OpenStreetMap](https://www.openstreetmap.org) snapshot (`src/data/osm-uae.json`) | **A snapshot, not a live feed.** Can be incomplete or out of date. Refresh with `node scripts/build-osm-data.mjs`. |
+| **Map background** | [OpenFreeMap](https://openfreemap.org) | Live vector tiles. |
+| **Map place names** (other languages) | OpenStreetMap `name:xx` tags + Wikidata (CC0) | Snapshot. Nothing is machine-translated; a place with no name in your language shows in English. |
+| **Ratings and reviews** | — | **Not shown.** There is no licensed source, and none are invented. |
+| **Provider websites** | Hand-checked ([`src/data/websites.js`](src/data/websites.js)) | 28 brands, checked 18 Nov 2026. |
+
+---
+
+## 🧮 How a provider's rate is estimated
+
+All the maths lives in [`src/lib/pricing.js`](src/lib/pricing.js).
+
+```text
+mid(B→T)  = ratePerAED[T] / ratePerAED[B]                  # the cross-checked market rate
+
+spread %  = max(0.15, margin + bias[T] + 0.5·bias[B] + (bank transfer ? −0.20 : 0))
+weBuy     = mid × (1 − spread%)      # you hand over B, provider buys it  → you receive this many T per B
+weSell    = mid × (1 + spread%)      # you buy B from the provider        → you pay this many T per B
+
+Sell mode:  you receive = (amount − feeBase) × weBuy
+Buy mode:   you pay     = (amount + feeBase) × weSell      (feeBase is 0 for cash)
+```
+
+| Group | Typical spread | Bank-transfer fee |
+| --- | --- | --- |
+| 8 hand-profiled exchange houses | 0.50 – 0.80 % (per provider and currency) | AED 10 – 16 |
+| Every other exchange house | 0.65 % (one category average) | AED 12 |
+| Banks | 1.8 % (one category average) | AED 25 |
+| Paying by bank transfer instead of cash | spread 0.2 percentage points tighter | the flat fee above |
+
+> ⚠️ These spreads are **modelled by Xchange Desk, not measured or supplied by the providers**. Providers in the same category show the same figure. Always confirm the real rate and fees at the counter.
+
+---
+
+## 🤖 The AI assistant (Ask Xchange)
+
+A floating **Ask Xchange** button opens a chat that can *operate the page*:
+
+> *"Best rate for 1,000 USD to AED near Deira, open now"* · *"Compare the top three"* · *"Banks open now in Sharjah"* · *"Closest to me"* · *"What should I bring?"*
+
+It replies in the user's language and works with these tools, all of which run **in the browser** against live page state:
+
+| Tool | What it does |
+| --- | --- |
+| `update_search` | Changes currencies, amount, mode, channel, area, filters or sort, then returns the top matches |
+| `get_results` | Reads the providers currently shown |
+| `get_provider_details` | Branches, hours and how a provider's rate is estimated |
+| `compare_providers` | Fills the side-by-side tray with 2 to 4 providers |
+| `show_on_map` | Selects a provider and flies the map to a branch |
+| `find_nearest` | Asks the browser for location (with permission), then sorts by distance |
+
+- **Model:** Claude Haiku 5.5 (`claude-haiku-5-5`), thinking off, 1,024 output tokens per reply. Change it in [`src/lib/chatSpec.js`](src/lib/chatSpec.js).
+- **No invented numbers:** every figure it states must come from a tool result; provider rates stay "estimated"; it never states a rating or review.
+- **Privacy:** the conversation goes to Anthropic to produce the answer. The server keeps **no chat log**; the browser keeps the chat in `sessionStorage` for the tab only. Coordinates are never sent, only distances like "0.3 km".
+- **Limits:** best-effort 40 messages per 10 minutes per visitor and 4,000 per day (configurable); the hard ceiling is the spend limit you set in the Anthropic Console.
+- **Switching it on:** add `ANTHROPIC_API_KEY` (see [Configuration](#-configuration)). Without it the chat says it "isn't switched on yet" and nothing else changes.
+
+---
+
+## 💻 Run the website locally
+
+**Requirements:** Node.js 18 or newer and npm.
 
 ```bash
-git clone https://github.com/allnewrup/XD-XchangeDesk.git
-cd XD-XchangeDesk
+git clone https://github.com/allnewrup/Xchange-Desk-Foreign-Exchange.git
+cd Xchange-Desk-Foreign-Exchange
 npm install
 npm run dev
 ```
 
-Open the URL Vite prints (normally <http://localhost:5173>). Live rates load automatically.
+Open the address Vite prints (normally <http://localhost:5173>). Live rates load automatically through the built-in `/api/yahoo` proxy.
 
-| Script | What it does |
+| Command | What it does |
 | --- | --- |
-| `npm run dev` | Dev server with hot reload and the live-rates proxy |
+| `npm run dev` | Dev server with hot reload, the live-rates proxy and the `/api/chat` route |
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serves the production build, with the same proxy |
+| `npm test` | Runs the unit tests (dashboard metrics, multi-transfer maths, alerts, live-rate merging) |
 
 ---
 
-## Data: what is live and what is not
+## 🔧 Configuration
 
-Be clear about this before relying on any number.
+Copy [`.env.example`](.env.example) to `.env.local` for local work. On Vercel, add the same names in the project's **Settings → Environment Variables**.
 
-| Data | Source | Status |
+| Variable | Required? | Purpose |
 | --- | --- | --- |
-| **Market (mid) FX rate** | Four independent feeds, cross-checked: Yahoo Finance FX spot (minute-level, major currencies), ECB via Frankfurter (daily, ~30 currencies), `open.er-api.com` (daily, ~160) and fawazahmed0 currency-api (daily, 300+) | **Live where possible.** For each currency a quote is discarded unless another source corroborates it (within 0.25% plus an allowance for market movement between quote times), then the freshest surviving quote wins. The UI shows the source, the quote age and how many sources agreed. Daily-only currencies are labelled "daily reference rate". |
-| **Provider rates** (Sell / Buy) | Market rate plus a modelled per-provider spread | **Estimated.** None of the exchange houses offers a public rates API, and their sites load rates through private services, so genuine counter rates can't be collected legitimately. |
-| Provider ratings, review counts and reviews | none | **Not shown.** Empty until Google Places data is connected. |
-| Branch coordinates | `src/data/seed.js` | **Approximate** positions per neighbourhood. |
-| Opening hours | `src/data/seed.js` | Sample hours, evaluated against UAE time (Asia/Dubai). |
+| `ANTHROPIC_API_KEY` | Only for the assistant | Turns **Ask Xchange** on. **Server-side only: never prefix it with `VITE_`**, or it would be shipped to every visitor's browser. |
+| `CHAT_REQUESTS_PER_10_MIN` | No (default 40) | Best-effort per-visitor limit for the assistant. |
+| `CHAT_DAILY_CAP` | No (default 4000) | Best-effort daily cap across all visitors. |
+| `VITE_PLACES_PROXY` | No | URL of your own Google Places proxy. Leave empty and no ratings or reviews are shown. |
 
-On weekends the forex market is closed, so the live quote is the last close (for example Friday night). The quote time next to the "Live market" strip tells you exactly which moment you are looking at.
+Other places to customise:
 
-If the live source is unreachable, the app keeps the last known rates and shows a red status message. It retries every minute.
-
----
-
-## How rates are calculated
-
-All maths lives in [`src/lib/pricing.js`](src/lib/pricing.js).
-
-1. **Mid rate.** For base currency `B` and target `T`, with all rates stored as units per 1 AED:
-
-   ```
-   mid(B→T) = ratePerAED[T] / ratePerAED[B]
-   ```
-
-2. **Provider spread.**
-
-   ```
-   spread% = max(0.15, margin + bias[T] + 0.5 × bias[B] + (bank ? −0.20 : 0))
-   weBuy   = mid × (1 − spread%)      // provider buys your base currency; you receive this many T per B
-   weSell  = mid × (1 + spread%)      // provider sells base currency; you pay this many T per B
-   ```
-
-   `margin`, `bias` (per currency) and `fee` are defined per provider in `seed.js`.
-
-3. **Totals.**
-
-   ```
-   Sell mode: you receive = (amount − feeBase) × weBuy
-   Buy mode:  you pay     = (amount + feeBase) × weSell
-   feeBase    = feeAED × ratePerAED[B]      // 0 for cash
-   ```
-
-4. **Best rate.** In sell mode the highest "you receive" wins. In buy mode the lowest "you pay" wins. The "vs. lowest" or "vs. priciest" figure on each card is measured against the worst offer in the current result set.
-
-To use real counter rates, replace the spread model in `quote()` with rates you have collected, or add a per-provider override table.
+| Setting | Where |
+| --- | --- |
+| Contact email, operator name, site URL, policy dates | [`src/data/site.js`](src/data/site.js) |
+| Provider spreads, fees, currencies, areas | [`src/data/seed.js`](src/data/seed.js) |
+| Official website links | [`src/data/websites.js`](src/data/websites.js) |
+| Mobile-app download link (header QR button) | `APP_DOWNLOAD_URL` in [`src/components/QrBadge.jsx`](src/components/QrBadge.jsx). **It is empty on purpose, which hides the QR button.** Set it to the real store link once the app is published. |
+| Assistant model, limits, system prompt | [`src/lib/chatSpec.js`](src/lib/chatSpec.js) |
 
 ---
 
-## Project structure
+## ▲ Deploy to Vercel
 
+The website is a static Vite build plus two serverless functions, so it deploys to Vercel with no extra configuration.
+
+```bash
+npm install -g vercel
+vercel login
+vercel link              # choose the team and the xd-xchange-desk project
+vercel env add ANTHROPIC_API_KEY --environment production --sensitive   # paste the key at the prompt
+vercel deploy --prod
 ```
-XD-XchangeDesk/
-├── index.html                    Fonts and root element
-├── vite.config.js                Vite + React, the /api/yahoo proxy, and a dev route for /api/chat
-├── vercel.json                   Yahoo rewrite and the chat function's time limit
-├── api/
-│   ├── yahoo.js                  Serverless proxy to Yahoo Finance
-│   └── chat.js                   Serverless relay to Claude (streams SSE, holds the API key)
-├── tailwind.config.js            Palette, fonts, skeuomorphic shadow scale
-├── postcss.config.js
+
+- [`vercel.json`](vercel.json) routes `/api/yahoo/*` to the rate relay, serves the information pages (`/about`, `/privacy`, …) from the single-page app, and gives the chat function a 30 second limit.
+- [`.vercelignore`](.vercelignore) keeps the `mobile/` folder and the docs out of web deployments.
+- A new environment variable only takes effect on the **next** deployment.
+- Yahoo's endpoint is unofficial. For a commercial product, switch to a licensed FX data provider (see [roadmap](#-roadmap)).
+
+---
+
+## 📱 The mobile app
+
+Lives in [`/mobile`](mobile). **Run every command from that folder.**
+
+```bash
+cd mobile
+npm install
+npx expo start
+```
+
+Scan the QR code with **Expo Go** (the native map needs a real build, so Expo Go shows a branch list in its place).
+
+**Build installable apps in the cloud with EAS** (no Xcode or Android Studio needed):
+
+```bash
+npm install -g eas-cli
+eas login
+eas build -p android --profile preview      # installable .apk for testing
+eas build -p android --profile production   # .aab for Google Play
+eas build -p ios --profile production       # needs an Apple Developer account (US$99/year)
+```
+
+- Bundle ID / package: `com.xchangedesk.app`.
+- Rates come from the website's relay (`API_BASE` in [`mobile/src/data/site.js`](mobile/src/data/site.js)), so the website must stay deployed.
+- Full details, the store checklist and the privacy-label notes are in [`mobile/README.md`](mobile/README.md).
+
+---
+
+## 📁 Project structure
+
+<details>
+<summary><b>Click to expand the file tree</b></summary>
+
+```text
+Xchange-Desk-Foreign-Exchange/
+├── README.md                     ← you are here
+├── index.html                    Fonts, favicon links, root element
+├── package.json                  Website dependencies and scripts
+├── vite.config.js                Vite + React, the /api/yahoo proxy, a dev route for /api/chat
+├── vercel.json                   Yahoo rewrite, page rewrites, chat function time limit
+├── .vercelignore                 Keeps /mobile and /docs out of web deployments
 ├── .env.example                  ANTHROPIC_API_KEY and optional limits
-├── docs/screenshot.png
-└── src/
-    ├── main.jsx                  Entry point
-    ├── App.jsx                   State, filtering, sorting, layout
-    ├── index.css                 Tailwind layers and component classes
-    │                             (.panel, .well, .btn, .key, .switch, .board, .flip-digit, badges)
-    ├── pages/                    About, Methodology, Sources, Contact, Privacy, Terms (+ PageShell)
-    ├── data/
-    │   ├── site.js               Contact email, operator name, policy date, page list
-    │   └── seed.js               Currencies, areas, spread models, offline rates
-    ├── services/
-    │   └── fxDataService.js      Data adapter: getSnapshot, refreshLiveRates, enrichFromGoogle
-    ├── lib/
-    │   ├── pricing.js            Quote and conversion maths, open-now, distance, deep links
-    │   ├── results.js            Row derivation, sorting and filter-merging shared by the page and the assistant
-    │   ├── chatSpec.js           Assistant model, limits, system prompt and tool schemas (used by server and browser)
-    │   ├── chatTools.js          The assistant's tools; they run in the browser against live page state
-    │   └── chatClient.js         Streams /api/chat and runs the tool loop
-    └── components/
-        ├── SearchConsole.jsx     Pair, amount, switches, area, refresh
-        ├── Sidebar.jsx           Open now, emirate, sort (rating filter when ratings exist)
-        ├── SortTabs.jsx          Best Rate / Highest Rated / Closest tabs
-        ├── ProviderCard.jsx      Result card with rate board
-        ├── MapPanel.jsx          MapLibre rate-pin map with language picker, location marker and Google Maps button
-        ├── ChatLauncher.jsx      Floating button; lazy-loads the chat panel
-        ├── ChatPanel.jsx         Chat UI: suggestions, streaming replies, action chips, stop / new chat
-        ├── ReviewsDrawer.jsx     Reviews view
-        ├── CompareTray.jsx       Pinned side-by-side table
-        ├── QrBadge.jsx           Header badge, full-screen QR modal, app link constant
-        └── ui.jsx                Stars, Switch, FlipRate, Mark, Pill, icons
+├── tailwind.config.js · postcss.config.js
+├── api/
+│   ├── yahoo.js                  Serverless relay to Yahoo Finance (adds the headers browsers can't)
+│   └── chat.js                   Serverless relay to Claude (streams SSE, holds the API key, checks origin, rate-limits)
+├── public/                       Favicon (SVG + PNG), touch icon, robots.txt, sitemap.xml
+├── scripts/
+│   ├── build-osm-data.mjs        Rebuilds src/data/osm-uae.json from OpenStreetMap
+│   └── build-map-places.mjs      Rebuilds map place names from OpenStreetMap + Wikidata
+├── docs/                         README banner, screenshots, app icon
+├── src/
+│   ├── main.jsx · App.jsx        Entry point; state, filtering, sorting, layout, routing
+│   ├── index.css                 Tailwind layers and the reusable component classes
+│   ├── pages/                    About, Methodology, Sources, Contact, Privacy, Terms (+ PageShell)
+│   ├── components/               HeaderNav, TopTicker, HeroMatrix, KpiStrip, OperatorFilters, ProviderCard,
+│   │                             CompareTray / CompareDock, RightRail, MapPanel, RateAlertsModal,
+│   │                             MultiTransferModal, ChatLauncher / ChatPanel, SyncStrip, ui (shared bits)
+│   ├── data/                     seed.js (spreads, currencies, areas) · providers.js (builds the list)
+│   │                             osm-uae.json (branches) · map-places.json · websites.js · site.js
+│   ├── services/fxDataService.js The only module that knows where data comes from; components never call fetch
+│   └── lib/                      pricing.js (all rate maths) · results.js · analytics.js (+ tests)
+│                                 liveRates.js · exportCsv.js · currencies.js · router.jsx
+│                                 chatSpec.js · chatTools.js · chatClient.js
+└── mobile/                       The iPhone and Android app (its own package.json, README and EAS config)
+    ├── App.js · app.json · eas.json
+    ├── assets/                   Icons and splash
+    └── src/                      screens · components · state · lib (fx, pricing, results) · data · content.js
 ```
 
-### The data adapter
-
-`fxDataService` is the only module that knows where data comes from. Components never call `fetch`.
-
-```js
-getSnapshot()          // offline-safe seed: providers, branches, mid rates
-refreshLiveRates()     // → { mid, quoteTimes, sourceInfo, dailyCodes, updatedAt, host }  four feeds, cross-checked
-enrichFromGoogle(list) // → { providers, enriched }  no-op until VITE_PLACES_PROXY is set
-```
+</details>
 
 ---
 
-## Configuration
+## 🔒 Privacy and security
 
-| Setting | Where | Purpose |
-| --- | --- | --- |
-| `VITE_PLACES_PROXY` | `.env` | URL of your Google Places proxy. Leave empty and no ratings or reviews are shown. |
-| `ANTHROPIC_API_KEY` | `.env.local` (dev) / `vercel env add ANTHROPIC_API_KEY` (production) | Turns the assistant on. Server-side only: never prefix it with `VITE_`. Without it the chat shows "not switched on yet" and nothing else changes. |
-| `CHAT_REQUESTS_PER_10_MIN`, `CHAT_DAILY_CAP` | environment | Best-effort limits per visitor and per day (defaults 40 and 4,000). They are per server instance; the hard ceiling is the monthly spend limit you set in the Anthropic Console. |
-| `APP_DOWNLOAD_URL` | `src/components/QrBadge.jsx` | The link encoded in the QR code. **It is a placeholder (`https://example.com/get-xchange-desk`). Replace it with your real app smart link before sharing the app.** |
-| Refresh interval | `src/App.jsx` (`setInterval(..., 60000)`) | How often live rates reload. |
-| Providers, spreads, fees | `src/data/seed.js` | Per-provider `margin`, `bias`, `fee`, branches. |
+- **No accounts, no cookies, no ads, no analytics trackers, no database.** Saved alerts and the chat live only in your browser (`localStorage` / `sessionStorage`).
+- **Location** is used in your browser (or on your phone) only, to sort by distance. It is not sent to our server and **never** given to the assistant.
+- **The assistant's API key** stays on the server and is never sent to a browser. The chat function checks the request origin, validates and rebuilds every message from known shapes, and rate-limits visitors.
+- **Third parties** that see a visitor's IP address (rate feeds, map tiles, fonts, Vercel, Anthropic when chatting) are listed in the in-site [Privacy Policy](https://xd-xchange-desk.vercel.app/privacy), which also covers the mobile app.
+- The website's dependencies are kept current: `npm audit` reports **0 vulnerabilities** for the website (the mobile app's dependencies are audited separately).
 
 ---
 
-## Connecting real Google data
+## 🩺 Status and honest limitations
 
-The browser must never hold a Google API key, so the app expects a small server route you control.
+_Last reviewed 19 November 2026._
 
-1. Enable **Places API (New)** in Google Cloud and create a key restricted to your server.
-2. Add a route (for example `GET /api/places?q=Al Ansari Exchange UAE`) that calls `places:searchText` and then Place Details, and returns a place object with at least:
+| Item | State |
+| --- | --- |
+| Website | ✅ Live at <https://xd-xchange-desk.vercel.app> |
+| Rates, charts, map, alerts, calculator, CSV export | ✅ Working |
+| **Ask Xchange assistant** | ⏳ Code complete and tested with mocked replies. **Not switched on in production until `ANTHROPIC_API_KEY` is added.** It has not yet been exercised against the real Claude API. |
+| Android app | ✅ Installs and launches on a real phone and shows live rates. ⏳ The native map and location prompt are not yet verified on a device. |
+| iPhone app | ⏳ Not built: needs an Apple Developer account. |
+| Licensed FX data | ⏳ Rates use free public feeds. The Yahoo endpoint is unofficial and not licensed for commercial redistribution; replace it before a store release. |
 
-   ```json
-   {
-     "rating": 4.5,
-     "userRatingCount": 21480,
-     "reviews": [
-       {
-         "authorAttribution": { "displayName": "Name" },
-         "rating": 5,
-         "publishTime": "2026-10-01T10:00:00Z",
-         "text": { "text": "Review text" }
-       }
-     ]
-   }
-   ```
+Known limitations:
 
-3. Set `VITE_PLACES_PROXY=https://your-host/api/places` in `.env`.
-
-When enrichment succeeds, ratings, the rating filter, "Top rated" sort and the reviews drawer appear, marked as coming from Google. Follow Google's terms for displaying and attributing reviews, and its caching limits. For exact branch coordinates, extend the same route to return each branch's `location` and merge it into `branches`.
+- **Provider rates are modelled, not scraped.** The market rate is accurate; the counter rate is an estimate.
+- **No ratings or reviews.** There is no licensed source and none are invented. Each provider links to its reviews on Google instead.
+- **Branch data is a snapshot** from OpenStreetMap: a branch may have moved, closed or changed hours, and a bank branch may not exchange currency.
+- Opening hours use UAE time and ignore public holidays and Ramadan hours.
+- OpenFreeMap is a donation-funded free service with no uptime guarantee; heavy traffic would need self-hosted or paid tiles.
+- Only 9 unit tests so far (the analytics and live-rate maths); the interface itself is checked by hand in a browser.
 
 ---
 
-## Deploying
+## 🚀 Roadmap
 
-`npm run build` produces a static site in `dist/`. The only part that needs a server is the **live-rates proxy**, because Yahoo's endpoint sends no CORS headers and wants a User-Agent. Without it, the app falls back to a daily rate feed.
-
-Provide `/api/yahoo/*` on your host, forwarding to `https://query1.finance.yahoo.com/*`. A minimal Node example:
-
-```js
-// server.js: serves dist/ and the proxy
-import express from 'express';
-const app = express();
-app.use('/api/yahoo', async (req, res) => {
-  const r = await fetch(`https://query1.finance.yahoo.com${req.url}`, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; xchange-desk)' },
-  });
-  res.status(r.status).type('json').send(await r.text());
-});
-app.use(express.static('dist'));
-app.listen(8080);
-```
-
-**The assistant** needs a server too: `api/chat.js` is a standard Vercel function (it is the same file `npm run dev` serves). Add `ANTHROPIC_API_KEY`, redeploy, and set a monthly spend limit in the Anthropic Console. On another host, expose the same handler at `POST /api/chat`. It accepts `{messages, context}` and streams server-sent events (`text`, `done`, `error`).
-
-For heavier traffic, cache each symbol for 30 to 60 seconds on the server. Yahoo's endpoint is unofficial and has no guaranteed uptime or licence for commercial redistribution. For a production product, use a licensed FX data provider (for example a paid API with an SLA) and point `fromYahoo()` in `fxDataService.js` at it.
+- [ ] Add `ANTHROPIC_API_KEY` and verify the assistant against the real API
+- [ ] Licensed real-time FX data source with server-side caching
+- [ ] Publish the Android app (Google Play) and, with an Apple Developer account, the iPhone app; then set `APP_DOWNLOAD_URL`
+- [ ] Verify the native map on real devices
+- [ ] Real Google Places ratings, hours and coordinates (via your own proxy)
+- [ ] Per-provider rate overrides and a "last verified at the counter" stamp
+- [ ] Shareable URLs for a search (pair, amount, filters)
+- [ ] Rate-alert notifications (push) in the app
+- [ ] More tests: component tests for the cards and end-to-end checks
 
 ---
 
-## Customising
+## 🙏 Credits and data licences
 
-**Add a provider.** Append an object to `PROVIDERS` in `src/data/seed.js` with `id`, `name`, `mark` (two letters), `hue`, `margin`, `fee`, `bias` and `branches` (set `rating`, `reviewCount` and `reviews` only from real data). Use the `branch()` helper for branches.
+| Used for | Thanks to |
+| --- | --- |
+| Providers, branches, hours, place names | © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), [ODbL](https://opendatacommons.org/licenses/odbl/); [Wikidata](https://www.wikidata.org) (CC0) |
+| Map tiles and style | [OpenFreeMap](https://openfreemap.org), © OpenMapTiles, data from OpenStreetMap |
+| Map engine | [MapLibre GL JS](https://maplibre.org) (web) and MapLibre Native (app) |
+| Market rates | Yahoo Finance (unofficial), [ECB via Frankfurter](https://frankfurter.dev), [open.er-api.com](https://www.exchangerate-api.com), [fawazahmed0/currency-api](https://github.com/fawazahmed0/exchange-api) |
+| AI assistant | [Anthropic Claude](https://www.anthropic.com) |
+| Hosting | [Vercel](https://vercel.com) |
+| Mobile | [Expo](https://expo.dev) and React Native |
 
-**Add a currency.** Every currency the daily feeds carry (about 160) appears automatically. To give one a minute-level live quote, add it to `CURRENCIES` and `SEED_MID_PER_AED` in `seed.js`; Yahoo must offer a `USD<code>=X` symbol for it.
-
-**Add an area.** Add an entry to `AREAS` (with a centre point) and to `PLACE` in `seed.js`, then use the area name on branches.
-
-**Restyle.** Colours, fonts and the shadow scale are in `tailwind.config.js`. The reusable skeuomorphic pieces are Tailwind `@apply` classes in `src/index.css`.
-
----
-
-## Design notes
-
-- **Physical cues:** recessed `shadow-well` inputs, raised buttons with layered drop shadows and a `border-t border-white/60` top-edge highlight, slide switches with a bevelled knob, brass, steel and copper badge gradients.
-- **Rate boards:** black glass panel, amber LED digits on individual hinged tiles with a centre seam.
-- **Type:** Barlow Condensed for headings and board labels, Barlow for text, IBM Plex Mono for figures.
-- **Layout:** three columns on wide screens (filters, results, map and reviews). On narrower screens the filters stack above the results and the map panel below them.
-- **Accessibility:** native selects and inputs, visible focus rings, `role="switch"` and `aria-pressed` states, `aria-live` status messages, Escape closes the QR modal, and `prefers-reduced-motion` is respected.
+Licence: **no licence has been chosen yet.** Until one is added, all rights are reserved by the author.
 
 ---
 
-## Known limitations
+## 📜 Disclaimer
 
-- Provider rates are modelled, not scraped. The market rate is accurate, the counter rate is an estimate.
-- Ratings and reviews are not shown until the Places proxy is connected. Hours and branch pins come from OpenStreetMap and can be out of date.
-- The Yahoo endpoint is unofficial. It can change or block requests without notice.
-- Branch coordinates are placeholders (area centre plus a small offset) until the Places proxy supplies real ones, so "nearest" is only as accurate as that data.
-- The Google Maps button embeds one branch at a time. A multi-pin Google map would need the Maps JavaScript API and a key.
-- Layout has been checked at desktop width. Phone layouts use stacking rules but have had less testing.
-- No automated tests yet.
+Xchange Desk is an **independent comparison tool**. It is not an exchange house, it cannot exchange money for you, and it is not affiliated with, endorsed by or sponsored by any provider named in it. Provider names appear only to identify the businesses being compared; the monogram plates are not official logos. Rates shown are **indicative estimates, not offers**. Confirm the final rate, fees and any limits with the provider before you transact. This is not financial advice.
 
----
-
-## Roadmap
-
-- Licensed real-time FX source with server-side caching
-- Real Google Places ratings, reviews, hours and coordinates
-- Per-provider rate overrides and a "last verified at counter" stamp
-- Rate history sparkline per pair
-- Geolocation for true "closest" ranking
-- Shareable URLs for a search (pair, amount, filters)
-- Unit tests for `pricing.js` and component tests for the cards
-
----
-
-## Where the exchange houses and banks come from
-
-The provider list is built from **OpenStreetMap** (© OpenStreetMap contributors, ODbL): every tagged `amenity=bureau_de_change` and `amenity=bank` in the UAE, grouped by brand. That gives real names and real coordinates, with opening hours where mappers added them. Refresh it with `node scripts/build-osm-data.mjs` (it writes `src/data/osm-uae.json` and resumes if interrupted).
-
-- Exchange houses: every named brand is included (95). Unnamed bureaus are skipped.
-- Banks: only brands with 3 or more branches (32), and OpenStreetMap does not say whether a given branch exchanges currency, so confirm before you go.
-- The first eight exchange houses keep their hand-written spread profiles. Every provider has **no rating or reviews** (none are invented), and every other provider uses one **category-average spread**, so their rates are identical until real rates are available.
-- OpenStreetMap coverage is incomplete and can be out of date, and branch emirates are taken from the official boundaries (Abu Dhabi is "everything else").
-
-## Disclaimer
-
-Xchange Desk is an independent comparison tool. It is not affiliated with, endorsed by or sponsored by any exchange house named in it, and provider names appear only to identify the businesses being compared. Monogram plates are placeholders, not official logos. Rates shown are indicative and not an offer. Confirm the final rate, fee and any limits with the provider before you transact.
-
-## Licence
-
-No licence has been chosen yet. Until one is added, all rights are reserved by the author.
+<div align="center">
+<br/>
+Xchange Desk · <a href="https://xd-xchange-desk.vercel.app">xd-xchange-desk.vercel.app</a> · <a href="mailto:xchangedesk@gmail.com">xchangedesk@gmail.com</a>
+</div>

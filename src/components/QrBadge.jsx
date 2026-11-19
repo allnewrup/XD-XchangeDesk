@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { Icon } from './ui.jsx';
 
-// Replace with the real smart-link (e.g. an app.link / onelink URL that routes iOS → App Store, Android → Play).
-export const APP_DOWNLOAD_URL = 'https://example.com/get-xchange-desk';
+// Set this to the real download link (a store listing, or a smart link that routes iOS → App Store, Android → Play).
+// While it is empty the header's QR button is hidden, so nobody scans a code that leads nowhere.
+export const APP_DOWNLOAD_URL = '';
 
 export function useQr(size) {
   const [src, setSrc] = useState('');
